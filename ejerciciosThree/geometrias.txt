@@ -1,0 +1,76 @@
+1. BoxGeometry(width, height, depth, widthSegments, heightSegments, depthSegments)
+→ Crea una caja o cubo.
+Ejemplo: new THREE.BoxGeometry(1, 1, 1)
+
+2. SphereGeometry(radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength)
+→ Crea una esfera.
+Ejemplo: new THREE.SphereGeometry(1, 32, 16)
+
+3. CircleGeometry(radius, segments, thetaStart, thetaLength)
+→ Crea un círculo plano.
+Ejemplo: new THREE.CircleGeometry(1, 32)
+
+4. PlaneGeometry(width, height, widthSegments, heightSegments)
+→ Crea un plano rectangular.
+Ejemplo: new THREE.PlaneGeometry(2, 2)
+
+5. RingGeometry(innerRadius, outerRadius, thetaSegments, phiSegments, thetaStart, thetaLength)
+→ Crea un anillo plano.
+Ejemplo: new THREE.RingGeometry(0.5, 1, 32)
+
+6. CylinderGeometry(radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength)
+→ Crea un cilindro.
+Ejemplo: new THREE.CylinderGeometry(1, 1, 2, 32)
+
+7. ConeGeometry(radius, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength)
+→ Crea un cono.
+Ejemplo: new THREE.ConeGeometry(1, 2, 32)
+
+8. TorusGeometry(radius, tube, radialSegments, tubularSegments, arc)
+→ Crea un toro (donut).
+Ejemplo: new THREE.TorusGeometry(1, 0.4, 16, 100)
+
+9. TorusKnotGeometry(radius, tube, tubularSegments, radialSegments, p, q)
+→ Crea un nudo toroide.
+Ejemplo: new THREE.TorusKnotGeometry(1, 0.3, 100, 16)
+
+10. DodecahedronGeometry(radius, detail)
+→ Crea un dodecaedro.
+Ejemplo: new THREE.DodecahedronGeometry(1)
+
+11. IcosahedronGeometry(radius, detail)
+→ Crea un icosaedro.
+Ejemplo: new THREE.IcosahedronGeometry(1)
+
+12. OctahedronGeometry(radius, detail)
+→ Crea un octaedro.
+Ejemplo: new THREE.OctahedronGeometry(1)
+
+13. TetrahedronGeometry(radius, detail)
+→ Crea un tetraedro.
+Ejemplo: new THREE.TetrahedronGeometry(1)
+
+LatheGeometry(points, segments, phiStart, phiLength)
+→ Crea una forma girada a partir de puntos 2D.
+Ejemplo:
+const points = [new THREE.Vector2(0, 0), new THREE.Vector2(1, 2)];
+new THREE.LatheGeometry(points, 12);
+
+15. ShapeGeometry(shape, segments)
+→ Convierte una forma 2D en geometría.
+Ejemplo:
+const shape = new THREE.Shape();
+// definir forma...
+new THREE.ShapeGeometry(shape);
+
+16. ExtrudeGeometry(shapes, options)
+→ Extruye una forma 2D para crear volumen.
+Parámetros importantes en options: depth, bevelEnabled, bevelSize, bevelThickness, steps, etc.
+Ejemplo:
+new THREE.ExtrudeGeometry(shape, { depth: 1, bevelEnabled: false });
+
+17. TubeGeometry(path, tubularSegments, radius, radialSegments, closed)
+→ Crea un tubo siguiendo una curva 3D.
+Ejemplo:
+const path = new THREE.CurvePath(); // o una instancia de THREE.Curve
+new THREE.TubeGeometry(path, 100, 0.1, 8, false);
