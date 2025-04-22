@@ -47,7 +47,7 @@ class Torre extends THREE.Object3D {
 
         this.toroide = new THREE.TorusGeometry(2,0.2,30,30);
         this.toroide.rotateX(Math.PI/2);
-        this.toroide.translate(0,11,0);
+        this.toroide.translate(0,10.8,0);
 
         this.toroide = new CSG.Brush(this.toroide, material);
 
