@@ -38,7 +38,7 @@ class Caballo extends THREE.Object3D {
             steps:1,
             curveSegments: 100,
             bevelEnabled: true,
-            bevelThickness: 0.85,
+            bevelThickness: 0.75,
             bevelSegments: 10
         }
 
@@ -53,27 +53,47 @@ class Caballo extends THREE.Object3D {
         this.shape_base.quadraticCurveTo(5.2,1.3, 4.5,1.5);
         this.shape_base.quadraticCurveTo(3.5,1.9,3.5,3);
         this.shape_base.lineTo(3,3);
-        this.shape_base.lineTo(0,4.5);
+        this.shape_base.lineTo(0,2.5);
 
 
         const points_base = this.shape_base.extractPoints(40).shape;
         this.geometry_base = new THREE.LatheGeometry(points_base, 100);
         this.geometry_base.scale(1.3,1.3,1.3);
-        this.geometry_base.translate(0.5,-3,2);
-        // OJOS
+        this.geometry_base.translate(0.5,-2.5,2);
 
+        // OJOS
+        this.geometry_ojo1 = new THREE.TorusGeometry(0.6,0.2);
+        this.geometry_ojo1.translate(-1.5,12.2,-0.8);
+
+        this.geometry_ojo2 = new THREE.TorusGeometry(0.6,0.2);
+        this.geometry_ojo2.translate(-1.5,12.2,5.3);
 
         // RECORTE BOCA
 
         // RECORTE_OREJAS   
+        this.geometry_orejas = new THREE.CylinderGeometry(1,1,10,3);
+        this.geometry_orejas.scale(2,2,2);
+        this.geometry_orejas.rotateX(Math.PI/2);
+        this.geometry_orejas.rotateY(-Math.PI/2);
+
+        this.geometry_orejas.translate(-6,16.6,2.3);
+
 
         // CONTRUIMOS BRUSH
         var cabeza = new CSG.Brush(this.geometry_cabeza, this.material);
         var base = new CSG.Brush(this.geometry_base, this.material);
+        var ojo1 = new CSG.Brush(this.geometry_ojo1, this.material);
+        var ojo2 = new CSG.Brush(this.geometry_ojo2, this.material);
+        var orejas = new CSG.Brush(this.geometry_orejas, this.material);
+
 
          //OPERAMOS
         var evaluador = new CSG.Evaluator();
         this.figura = evaluador.evaluate(cabeza, base, CSG.ADDITION);
+        this.figura = evaluador.evaluate(this.figura, ojo1, CSG.SUBTRACTION);
+        this.figura = evaluador.evaluate(this.figura, ojo2, CSG.SUBTRACTION);
+        this.figura = evaluador.evaluate(this.figura, orejas, CSG.SUBTRACTION);
+
 
         
         this.add(this.figura);
