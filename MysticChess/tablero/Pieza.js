@@ -3,13 +3,16 @@ import * as THREE from '../libs/three.module.js';
 import * as CSG from '../libs/three-bvh-csg.js';
 
 class Pieza extends THREE.Object3D {
-    constructor( equipo) {
+    constructor(equipo, casilla, nombre) {
         super();
         //this.createGUI(gui, titleGui);
         const materialNegroSuave = new THREE.MeshStandardMaterial({ color: 0x555555 });
         const materialNegroAzulado = new THREE.MeshStandardMaterial({ color: 0x2B2F3A });
         const materialBlancoRoto = new THREE.MeshStandardMaterial({ color: 0xEEE8DC });
-        
+
+        this.casillaActual = casilla;
+        this.nombre = nombre;
+
         var material = null;
         if(equipo == 0) {
             material = materialNegroAzulado;
@@ -17,18 +20,27 @@ class Pieza extends THREE.Object3D {
             material = materialBlancoRoto;
         }
         
-        var equipo = 0;
-        var casillaActual = null;
 
         var geometry = this.generarGeometria(); 
-        var mesh = new THREE.Mesh(geometry, material);
+        if(equipo == 1) {
+            geometry.rotateY(Math.PI);
+        }
+        this.mesh = new THREE.Mesh(geometry, material);
         
-        this.add(mesh);
+        this.add(this.mesh);
     }
 
     generarGeometria() {
         throw new Error('El método generarGeometria() debe ser implementado por la subclase.');
     }
+    
+    moverPieza(posI, posJ) {
+        this.mesh.position.set(posI,0,posJ)
+    }
+
+    
+
+
 
     createGUI (gui, titleGui) {
         this.guiControls = {

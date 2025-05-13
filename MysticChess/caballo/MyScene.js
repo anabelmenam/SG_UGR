@@ -7,7 +7,7 @@ import { TrackballControls } from '../libs/TrackballControls.js'
 import  Stats from '../libs/stats.module.js'
 
 // Clases de mi proyecto
-import { Caballo } from './caballo.js'
+import { Caballo } from './Caballo.js'
 
 /// La clase fachada del modelo
 class MyScene extends THREE.Scene {

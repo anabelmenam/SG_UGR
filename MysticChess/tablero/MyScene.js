@@ -17,6 +17,8 @@ import { Caballo } from './Caballo.js'
 import { Alfil } from './Alfil.js'
 
 import { Casilla }  from "./Casilla.js" 
+import { Tablero } from './Tablero.js'
+import { DecoracionTablero } from './DecoracionTablero.js'
 
  
 /// La clase fachada del modelo
@@ -56,7 +58,7 @@ class MyScene extends THREE.Scene {
     //this.casilla = new Casilla(0,0, 0xA0522D, this.gui, "");
     //this.add(this.casilla);
 
-    this.alfilNegro = new Alfil(0);
+    /*this.alfilNegro = new Alfil(0);
     this.alfilNegro.position.set(0, 0, 0);
     this.alfilNegro.scale.set(0.25, 0.25, 0.25);
     //this.add(this.alfilNegro);
@@ -99,12 +101,23 @@ class MyScene extends THREE.Scene {
     this.PeonCaballero = new PeonCaballero(0);
     this.PeonCaballero.position.set(0, 0, 0);
     this.PeonCaballero.scale.set(0.25, 0.25, 0.25);
-    //this.add(this.PeonCaballero);
+    //this.add(this.PeonCaballero);*/
 
     this.PeonMago = new PeonMago(1);
     this.PeonMago.position.set(0, 0, 0);
-    this.PeonMago.scale.set(0.25, 0.25, 0.25);
-    this.add(this.PeonMago);
+    this.PeonMago.scale.set(0.2, 0.1, 0.1);
+    //this.add(this.PeonMago);
+
+    //TABLERO
+    this.tablero = new Tablero();
+    this.tablero.position.set(0, 0, 0);
+    this.add(this.tablero);
+
+    this.decoracionTablero = new DecoracionTablero();
+    this.decoracionTablero.rotateX(Math.PI/2);
+    this.decoracionTablero.position.set(0, 0.5, 0);
+    this.add(this.decoracionTablero);
+
 
 
 
@@ -128,13 +141,12 @@ class MyScene extends THREE.Scene {
   
   createCamera () {
     // Para crear una cámara le indicamos
-    //   El ángulo del campo de visión en grados sexagesimales
+    //   El ángulo del campo de visión vértical en grados sexagesimales
     //   La razón de aspecto ancho/alto
     //   Los planos de recorte cercano y lejano
     this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 50);
-    // Recuerda: Todas las unidades están en metros
     // También se indica dónde se coloca
-    this.camera.position.set (0, 5, 13);
+    this.camera.position.set (12.2, 8.05, 12.2);
     // Y hacia dónde mira
     var look = new THREE.Vector3 (0,0,0);
     this.camera.lookAt(look);
@@ -142,6 +154,7 @@ class MyScene extends THREE.Scene {
     
     // Para el control de cámara usamos una clase que ya tiene implementado los movimientos de órbita
     this.cameraControl = new TrackballControls (this.camera, this.renderer.domElement);
+    
     // Se configuran las velocidades de los movimientos
     this.cameraControl.rotateSpeed = 5;
     this.cameraControl.zoomSpeed = -2;

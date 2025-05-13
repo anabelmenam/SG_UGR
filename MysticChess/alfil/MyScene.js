@@ -8,13 +8,7 @@ import  Stats from '../libs/stats.module.js'
 
 // Clases de mi proyecto
 
-import { PeonMago} from './PeonMago.js'
-import {PeonCaballero} from './PeonCaballero.js'
-
-import { Torre} from './Torre.js'
-import { Rey} from './Rey.js'
-import { Caballo } from './Caballo.js'
-import {Alfil} from "./Alfil.js"
+import { Alfil } from './Alfil.js'
 
  
 /// La clase fachada del modelo
@@ -51,64 +45,13 @@ class MyScene extends THREE.Scene {
     this.axis = new THREE.AxesHelper (2);
     this.add (this.axis);
 
-    this.axis1 = new THREE.AxesHelper (2);
-    this.axis1.position.set(-5, 0, 0);
-    this.add (this.axis);
-
-    this.axis4 = new THREE.AxesHelper (2);
-    this.axis4.position.set(5, 0, 0);
-    this.add (this.axis);
-
-    this.axis2 = new THREE.AxesHelper (2);
-    this.axis2.position.set(10, 0, 0);
-    this.add (this.axis2);
-
-    this.axis3 = new THREE.AxesHelper (2);
-    this.axis3.position.set(-10, 0, 0);
-    this.add (this.axis3);
-
-    this.axis4 = new THREE.AxesHelper (2);
-    this.axis4.position.set(15, 0, 0);
-    this.add (this.axis4);
-
-    this.axis5 = new THREE.AxesHelper (2);
-    this.axis5.position.set(-15, 0, 0);
-    this.add (this.axis5);
     
     
     // Por último creamos el modelo.
     // El modelo puede incluir su parte de la interfaz gráfica de usuario. Le pasamos la referencia a 
     // la gui y el texto bajo el que se agruparán los controles de la interfaz que añada el modelo.
-    this.caballo = new Caballo(this.gui, "Caballo");
-    this.caballo.scale.set(0.2, 0.2, 0.2);
-    this.caballo.position.set(0, 0.5, 0);
-    this.add (this.caballo);
-
-    this.peonCaballero = new PeonCaballero(this.gui, "Controles del modelo");
-    this.peonCaballero.scale.set(0.3, 0.3, 0.3);
-    this.peonCaballero.position.set(-5, 0, 0);
-    this.add (this.peonCaballero);
-
-    this.peonMago = new PeonMago(this.gui, "Controles del modelo");
-    this.peonMago.scale.set(0.3, 0.3, 0.3);
-    this.peonMago.position.set(5, 0, 0);
-    this.add (this.peonMago);
-
-    this.rey = new Rey(this.gui, "Controles del modelo 2");
-    this.rey.scale.set(0.3, 0.3, 0.3);
-    this.rey.position.set(10, 0, 0);
-    this.add (this.rey);
-
-    this.torre = new Torre(this.gui, "Controles del modelo 3");
-    this.torre.scale.set(0.3, 0.3, 0.3);
-    this.torre.position.set(-10, 0, 0);
-    this.add(this.torre);
-
-    this.alfil = new Alfil(this.gui, "Controles del modelo 4");
-    this.alfil.scale.set(0.3, 0.3, 0.3);
-    this.alfil.position.set(-15, 0, 0);
-    this.add(this.alfil);
-
+    this.alfil = new Alfil(this.gui, "Controles del modelo");
+    this.add (this.alfil);
 
   }
   

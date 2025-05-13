@@ -11,9 +11,8 @@ import { Pieza } from './Pieza.js';
 
 class Alfil extends Pieza {
 
-    constructor (equipo) {
-        super(equipo);
-        //createGui(gui, titleGui);
+    constructor (equipo, casilla) {
+        super(equipo, casilla);
         
     }
 

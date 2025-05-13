@@ -11,8 +11,8 @@ import { Pieza } from './Pieza.js';
 
 class Torre extends Pieza {
 
-    constructor (equipo) {
-        super(equipo);
+    constructor (equipo, casilla) {
+        super(equipo, casilla);
         
     }
 

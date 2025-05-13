@@ -3,32 +3,28 @@ import * as THREE from '../libs/three.module.js';
 import * as CSG from '../libs/three-bvh-csg.js';
 
 class Casilla extends THREE.Object3D {
-    constructor(i, j, color, gui, titleGui) {
+    constructor(i, j, colorCasilla) {
         super();
-        this.createGUI(gui, titleGui);
 
-        var material = new THREE.MeshStandardMaterial({color: 0xA0522D});
+        var material = new THREE.MeshStandardMaterial({color: colorCasilla});
         
-
-        var posI = i;
-        var posJ = j;
-        var pieza = null;
+        this.posI = i;
+        this.posJ = j;
+        this.pieza = null;
         var mesh = new THREE.BoxGeometry(1,1,1);
+        mesh.translate(this.posI, 0, this.posJ);
         var mesh = new THREE.Mesh (mesh, material);
-        
-        
-
         
         this.add(mesh);
     }
 
-    createGUI (gui, titleGui) {
-        this.guiControls = {
-            resolucion: 20,
-        }
-
-        var folder = gui.addFolder(titleGui);
-        folder.add(this.guiControls, 'resolucion', 3, 50, 1).name('Resolucion: ').listen().onChange ( () =>this.updateGeometria() );
+    setPieza(pieza) {
+        console.log(pieza);
+        this.pieza = pieza;
+        console.log(this.pieza);
+        this.pieza.scale.set(0.1, 0.1, 0.1);
+        this.pieza.position.set(this.posI, 0.5, this.posJ);
+        this.add(this.pieza);
     }
 
     updateGeometria() {

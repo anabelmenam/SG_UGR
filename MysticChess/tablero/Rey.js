@@ -11,8 +11,9 @@ import { Pieza } from './Pieza.js';
 
 class Rey extends Pieza {
 
-    constructor (equipo) {
-        super(equipo);
+    constructor (equipo, casilla) {
+        super(equipo, casilla);
+        
     }
 
     generarGeometria() {

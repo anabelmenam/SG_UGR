@@ -5,8 +5,9 @@ import { Pieza } from './Pieza.js';
 
 
 class Caballo extends Pieza {
-    constructor(equipo) {
-        super(equipo);
+    constructor (equipo, casilla) {
+        super(equipo, casilla);
+        
     }
 
     generarGeometria() {
@@ -61,8 +62,7 @@ class Caballo extends Pieza {
 
         var points_base = shape_base.extractPoints(40).shape;
         var geometry_base = new THREE.LatheGeometry(points_base, 100);
-        geometry_base.scale(1.3,1.3,1.3);
-        geometry_base.translate(0.5,-2.5,2);
+        //geometry_base.scale(1.3,1.3,1.3);
 
         // OJOS
         var geometry_ojo1 = new THREE.TorusGeometry(0.6,0.2);
@@ -91,10 +91,18 @@ class Caballo extends Pieza {
 
          //OPERAMOS
         var evaluador = new CSG.Evaluator();
-        var figura = evaluador.evaluate(cabeza, base, CSG.ADDITION);
-        figura = evaluador.evaluate(figura, ojo1, CSG.SUBTRACTION);
+        
+        var figura = evaluador.evaluate(cabeza, ojo1, CSG.SUBTRACTION);
         figura = evaluador.evaluate(figura, ojo2, CSG.SUBTRACTION);
         figura = evaluador.evaluate(figura, orejas, CSG.SUBTRACTION);
+        figura = figura.geometry;
+        figura.scale(0.8,0.8,0.8)
+        figura.translate(-0.5, 1.5, -1.5);
+        figura.rotateY(Math.PI/2);
+
+        figura = new CSG.Brush(figura, material);
+        figura = evaluador.evaluate(figura, base, CSG.ADDITION);
+        
 
         var geometriaCaballo = figura.geometry;
         
