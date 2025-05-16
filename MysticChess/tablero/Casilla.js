@@ -19,13 +19,16 @@ class Casilla extends THREE.Object3D {
     }
 
     setPieza(pieza) {
-        console.log(pieza);
-        this.pieza = pieza;
-        console.log(this.pieza);
-        this.pieza.scale.set(0.1, 0.1, 0.1);
+    this.pieza = pieza;
+    try {
+        this.pieza.scale.set(0.08, 0.08, 0.08);
         this.pieza.position.set(this.posI, 0.5, this.posJ);
         this.add(this.pieza);
+        console.log("Pieza añadida correctamente");
+    } catch (e) {
+        console.error("Error al añadir pieza en casilla:", this.posI, this.posJ, e);
     }
+}
 
     updateGeometria() {
         this.mesh.geometry.dispose();

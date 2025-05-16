@@ -7,7 +7,7 @@ import { Casilla } from './Casilla.js';
 import { Caballo } from './Caballo.js';
 import { Torre } from './Torre.js';
 import { Alfil } from './Alfil.js';
-//import { Reina } from './Reina.js';
+import { Reina } from './Reina.js';
 import { Rey } from './Rey.js';
 import { PeonCaballero } from './PeonCaballero.js';
 import { PeonMago } from './PeonMago.js';
@@ -46,8 +46,8 @@ class Tablero extends THREE.Object3D {
                 this.add(casilla);
             }
         }
-
-        //this.inicializarTablero();
+        console.log("En constructor tablero");
+        this.inicializarTablero();
 
 
 
@@ -65,11 +65,11 @@ class Tablero extends THREE.Object3D {
                 this.casillas[i][j].setPieza(null);
             }
         }*/
-
+        console.log("inicializando tablero");
         this.casillas[0][0].setPieza(new Torre(0, this.casillas[0][0]));
         this.casillas[1][0].setPieza(new Caballo(0, this.casillas[1][0]));
         this.casillas[2][0].setPieza(new Alfil(0, this.casillas[2][0]));
-        //this.casillas[0][3].setPieza(new Reina(0, this.casillas[0][3]));
+        this.casillas[3][0].setPieza(new Reina(0, this.casillas[3][0]));
         this.casillas[4][0].setPieza(new Rey(0, this.casillas[4][0]));
         this.casillas[5][0].setPieza(new Alfil(0, this.casillas[5][0]));
         this.casillas[6][0].setPieza(new Caballo(0, this.casillas[6][0]));
@@ -82,7 +82,7 @@ class Tablero extends THREE.Object3D {
         this.casillas[0][7].setPieza(new Torre(1, this.casillas[0][7]));
         this.casillas[1][7].setPieza(new Caballo(1, this.casillas[1][7]));
         this.casillas[2][7].setPieza(new Alfil(1, this.casillas[2][7]));
-        //this.casillas[3][7].setPieza(new Reina(1, this.casillas[3][7]));
+        this.casillas[3][7].setPieza(new Reina(1, this.casillas[3][7]));
         this.casillas[4][7].setPieza(new Rey(1, this.casillas[4][7]));
         this.casillas[5][7].setPieza(new Alfil(1, this.casillas[5][7]));
         this.casillas[6][7].setPieza(new Caballo(1, this.casillas[6][7]));
