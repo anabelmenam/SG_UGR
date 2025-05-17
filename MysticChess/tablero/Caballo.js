@@ -2,16 +2,14 @@
 import * as THREE from '../libs/three.module.js';
 import * as CSG from '../libs/three-bvh-csg.js';
 import { Pieza } from './Pieza.js';
-
+import { Brazos } from './Brazos.js';
 
 class Caballo extends Pieza {
-    constructor (equipo, casilla) {
-        super(equipo, casilla);
-        
+    constructor (equipo, casilla, nombre, resolucion) {
+        super(equipo, casilla, nombre, resolucion);
     }
 
     generarGeometria() {
-
         var evaluador = new CSG.Evaluator();
         var material = new THREE.MeshNormalMaterial();
         
@@ -40,10 +38,10 @@ class Caballo extends Pieza {
         var options_cabeza = {
             depth: 4.5,
             steps:1,
-            curveSegments: 100,
+            curveSegments: this.resolucion,
             bevelEnabled: true,
             bevelThickness: 0.75,
-            bevelSegments: 10
+            bevelSegments: this.resolucion
         }
 
         var geometry_cabeza = new THREE.ExtrudeGeometry(shape_cabeza, options_cabeza);
@@ -59,27 +57,22 @@ class Caballo extends Pieza {
         shape_base.lineTo(3,3);
         shape_base.lineTo(0,2.5);
 
-
-        var points_base = shape_base.extractPoints(40).shape;
-        var geometry_base = new THREE.LatheGeometry(points_base, 100);
-        //geometry_base.scale(1.3,1.3,1.3);
+        var points_base = shape_base.extractPoints(this.resolucion).shape;
+        var geometry_base = new THREE.LatheGeometry(points_base, this.resolucion);
 
         // OJOS
-        var geometry_ojo1 = new THREE.TorusGeometry(0.6,0.2);
+        var geometry_ojo1 = new THREE.TorusGeometry(0.6, 0.2, this.resolucion, this.resolucion);
         geometry_ojo1.translate(-1.5,12.2,-0.8);
-
-        var geometry_ojo2 = new THREE.TorusGeometry(0.6,0.2);
+        var geometry_ojo2 = new THREE.TorusGeometry(0.6, 0.2, this.resolucion, this.resolucion);
         geometry_ojo2.translate(-1.5,12.2,5.3);
 
 
         // RECORTE_OREJAS   
-        var geometry_orejas = new THREE.CylinderGeometry(1,1,10,3);
+        var geometry_orejas = new THREE.CylinderGeometry(1, 1, 10, 3, this.resolucion, this.resolucion);
         geometry_orejas.scale(2,2,2);
         geometry_orejas.rotateX(Math.PI/2);
         geometry_orejas.rotateY(-Math.PI/2);
-
         geometry_orejas.translate(-6,16.6,2.3);
-
 
         // CONTRUIMOS BRUSH
         var cabeza = new CSG.Brush(geometry_cabeza, material);
@@ -88,10 +81,8 @@ class Caballo extends Pieza {
         var ojo2 = new CSG.Brush(geometry_ojo2, material);
         var orejas = new CSG.Brush(geometry_orejas, material);
 
-
          //OPERAMOS
         var evaluador = new CSG.Evaluator();
-        
         var figura = evaluador.evaluate(cabeza, ojo1, CSG.SUBTRACTION);
         figura = evaluador.evaluate(figura, ojo2, CSG.SUBTRACTION);
         figura = evaluador.evaluate(figura, orejas, CSG.SUBTRACTION);
@@ -103,20 +94,35 @@ class Caballo extends Pieza {
         figura = new CSG.Brush(figura, material);
         figura = evaluador.evaluate(figura, base, CSG.ADDITION);
         
-
         var geometriaCaballo = figura.geometry;
         
         return geometriaCaballo;
     }
 
-    
+    generarBrazos(material, equipo) {
+        const brazos = new Brazos(material, this.resolucion);
+
+        const brazoIzq = brazos.createBrazoIzquierdo(equipo);
+        const brazoDch = brazos.createBrazoDerecho(equipo);
+
+        if(equipo == 1) {
+            brazoIzq.rotation.y = Math.PI;
+            brazoDch.rotation.y = Math.PI;
+        }
+        brazoIzq.position.set(-3, 9, 0);
+        brazoDch.position.set(2.5, 9, 0);
+
+        this.brazoIzq = brazoIzq;
+        this.brazoDch = brazoDch;
+
+        this.add(brazoIzq);
+        this.add(brazoDch);
+    }
 
     updateGeometria() {
         mesh.geometry.dispose();
         mesh.geometry = new THREE.LatheGeometry(points, guiControls.resolucion);
     }
-
 }
-
 
 export { Caballo };

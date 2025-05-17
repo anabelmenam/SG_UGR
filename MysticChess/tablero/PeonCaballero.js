@@ -1,40 +1,32 @@
-
-
 import { color } from '../libs/dat.gui.module.js';
 import * as THREE from '../libs/three.module.js'
 import * as CSG from '../libs/three-bvh-csg.js'
 import {Casco} from './Casco.js';
 import { Peon } from './Peon.js';
 
-
-
-
 class PeonCaballero extends Peon {
 
-    constructor (equipo, casilla) {
-        super(equipo, casilla);
-        
+    constructor (equipo, casilla, nombre, resolucion) {
+        super(equipo, casilla, nombre, resolucion);
     }
 
-    
-
     createCasco (material, evaluador) {
-        var cilindro = new THREE.CylinderGeometry(1,1,1,30);
-        var esfera = new THREE.SphereGeometry(1,30,30);
+        var cilindro = new THREE.CylinderGeometry(1, 1, 1, this.resolucion, this.resolucion);
+        var esfera = new THREE.SphereGeometry(1, this.resolucion, this.resolucion);
         cilindro.translate(0,0.5,0);
         esfera.translate(0,1,0);
         cilindro = new CSG.Brush(cilindro, material);
         esfera = new CSG.Brush(esfera, material);
 
-        var cilindro2 = new THREE.CylinderGeometry(0.8,0.8,1,30);
-        var esfera2 = new THREE.SphereGeometry(0.8,30,30);
+        var cilindro2 = new THREE.CylinderGeometry(0.8, 0.8, 1, this.resolucion, this.resolucion);
+        var esfera2 = new THREE.SphereGeometry(0.8, this.resolucion, this.resolucion);
         cilindro2.translate(0,0.5,0);
         esfera2.translate(0,1.1,0);
         cilindro2 = new CSG.Brush(cilindro2, material);
         esfera2 = new CSG.Brush(esfera2, material);
         var hueco = evaluador.evaluate(cilindro2, esfera2, CSG.ADDITION);
         
-        var caja = new THREE.BoxGeometry(1.5,1.5,1.5);
+        var caja = new THREE.BoxGeometry(1.5, 1.5, 1.5);
         caja.translate(0,0.5,1);
         caja = new CSG.Brush(caja, material);
         var casco = evaluador.evaluate(cilindro, esfera, CSG.ADDITION);
@@ -47,7 +39,7 @@ class PeonCaballero extends Peon {
         var path = new THREE.Shape();
         path.moveTo(1.4,1);
         path.quadraticCurveTo(1.25,2.25,0,2.4);
-        path = this.shape2CatmullCurve3(path, 30);
+        path = this.shape2CatmullCurve3(path, this.resolucion);
         
         var figura = new THREE.Shape();
         figura.lineTo(0.15,0.1);
@@ -57,16 +49,16 @@ class PeonCaballero extends Peon {
         figura.quadraticCurveTo(0.15,0.35,0,0.4);
         figura.lineTo(0,0);
 
-        var geometry = new THREE.ExtrudeGeometry(figura, { depth: 1,steps: 30, bevelEnabled: false, extrudePath: path });
+        var geometry = new THREE.ExtrudeGeometry(figura, { depth: 1,steps: this.resolucion, bevelEnabled: false, extrudePath: path });
         return geometry;
     }
 
-    createMascara (material, evaluador ) {
-        var cilindro3 = new THREE.CylinderGeometry(1.1,1.1,1,30);
+    createMascara (material, evaluador) {
+        var cilindro3 = new THREE.CylinderGeometry(1.1, 1.1, 1, this.resolucion);
         cilindro3.translate(0,0.4,0);
         var caja2 = new THREE.BoxGeometry(3,4,3);
         caja2.translate(0,0.4,-1.3);
-        var cilindro4 = new THREE.CylinderGeometry(1,1,4,30);
+        var cilindro4 = new THREE.CylinderGeometry(1, 1, 4, this.resolucion);
         cilindro4.translate(0,0.4,0);
         
         var shape1 = new THREE.Shape();
@@ -78,7 +70,7 @@ class PeonCaballero extends Peon {
         shape1.quadraticCurveTo(0.75,0.5, 1.2,0.5);
         shape1.lineTo(1.2,1.4);
 
-        var recorte1 = new THREE.ExtrudeGeometry(shape1, { depth: 2,steps: 30, bevelEnabled: false });
+        var recorte1 = new THREE.ExtrudeGeometry(shape1, { depth: 2,steps: this.resolucion, bevelEnabled: false });
 
         cilindro3 = new CSG.Brush(cilindro3, material);
         caja2 = new CSG.Brush(caja2, material);
@@ -110,7 +102,7 @@ class PeonCaballero extends Peon {
         return casco;
     }
 
-    shape2CatmullCurve3(shapePath, res = 30) {
+    shape2CatmullCurve3(shapePath, res = this.resolucion) {
         var v2 = shapePath.extractPoints(res).shape;
         var v3 = [];
         v2.forEach((v) => {
@@ -118,17 +110,6 @@ class PeonCaballero extends Peon {
         })
         return new THREE.CatmullRomCurve3(v3);
     }
-
-
-
 }
 
-
-
-
-export {PeonCaballero};
-
-
-/**
- * Radianes = grados * PI /180
- */
+export { PeonCaballero };

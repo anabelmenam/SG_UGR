@@ -3,17 +3,13 @@
 import { color } from '../libs/dat.gui.module.js';
 import * as THREE from '../libs/three.module.js'
 import * as CSG from '../libs/three-bvh-csg.js'
-import {Casco} from './Casco.js';
 import { Pieza } from './Pieza.js';
-
-
-
+import { Brazos } from './Brazos.js';
 
 class Peon extends Pieza {
 
-    constructor (equipo, casilla) {
-        super(equipo, casilla);
-        
+    constructor (equipo, casilla, nombre, resolucion) {
+        super(equipo, casilla, nombre, resolucion);
     }
 
     generarGeometria() {
@@ -21,20 +17,21 @@ class Peon extends Pieza {
         var evaluador = new CSG.Evaluator();
 
         //CABEZA
-        var geometry_cabeza = new THREE.SphereGeometry(2);
+        var geometry_cabeza = new THREE.SphereGeometry(2, this.resolucion, this.resolucion);
+        geometry_cabeza.rotateY(Math.PI/6);
         geometry_cabeza.translate(0,10.8,0);
 
-        var geometry_toro = new THREE.TorusGeometry(1.1,0.2);
+        var geometry_toro = new THREE.TorusGeometry(1.1,0.2, this.resolucion, this.resolucion);
         geometry_toro.rotateX(Math.PI/2);
+        geometry_toro.rotateY(Math.PI/6);
         geometry_toro.translate(0,9,0);
 
-        var geometry_ojo1 = new THREE.SphereGeometry(0.2);
+        var geometry_ojo1 = new THREE.SphereGeometry(0.2,this.resolucion, this.resolucion);
         geometry_ojo1.scale(1.5,1.8,1.8);
         geometry_ojo1.translate(0.8,11,-1.8);
         geometry_ojo1.rotateY(Math.PI);
 
-
-        var geometry_ojo2 = new THREE.SphereGeometry(0.2);
+        var geometry_ojo2 = new THREE.SphereGeometry(0.2,this.resolucion, this.resolucion);
         geometry_ojo2.scale(1.5,1.8,1.8);
         geometry_ojo2.translate(-0.8,11,-1.8);
         geometry_ojo2.rotateY(Math.PI);
@@ -49,13 +46,12 @@ class Peon extends Pieza {
         var ojo1 = new CSG.Brush(geometry_ojo1, material);
         var ojo2 = new CSG.Brush(geometry_ojo2, material);
 
-
         var casco = this.createCascoCompleto(material, evaluador);
         casco = casco.geometry;
-
         casco.scale(2.3,2.3,2.3);
         casco.translate(0,8.7,0);
         casco = new CSG.Brush(casco, material);
+        
         //OPERAMOS
         var figura = evaluador.evaluate(cabeza, cuerpo, CSG.ADDITION);
         figura = evaluador.evaluate(figura, toro, CSG.ADDITION);
@@ -66,8 +62,6 @@ class Peon extends Pieza {
         var geometriaPeonCaballero = figura.geometry;
         return geometriaPeonCaballero;
     }
-
-
 
     createCuerpo() {
         var shape = new THREE.Shape();
@@ -80,12 +74,30 @@ class Peon extends Pieza {
         shape.quadraticCurveTo(1.5,5, 1,9);
         shape.lineTo(0,9);
 
-        var points = shape.extractPoints(40).shape;
-        var geometry = new THREE.LatheGeometry(points, 100);
+        var points = shape.extractPoints(this.resolucion).shape;
+        var geometry = new THREE.LatheGeometry(points, this.resolucion);
         return geometry;
     }
 
-    
+    generarBrazos(material, equipo) {
+        const brazos = new Brazos(material, this.resolucion);
+
+        const brazoIzq = brazos.createBrazoIzquierdo(equipo);
+        const brazoDch = brazos.createBrazoDerecho(equipo);
+
+        if(equipo == 1) {
+            brazoIzq.rotation.y = Math.PI;
+            brazoDch.rotation.y = Math.PI;
+        }
+        brazoIzq.position.set(-1.3, 8, 0);
+        brazoDch.position.set(1.3, 8, 0);
+
+        this.brazoIzq = brazoIzq;
+        this.brazoDch = brazoDch;
+
+        this.add(brazoIzq);
+        this.add(brazoDch);
+    }
 
     createCascoCompleto() {
         //Implementar en hijos
@@ -99,17 +111,6 @@ class Peon extends Pieza {
         })
         return new THREE.CatmullRomCurve3(v3);
     }
-
-
-
 }
 
-
-
-
 export {Peon};
-
-
-/**
- * Radianes = grados * PI /180
- */

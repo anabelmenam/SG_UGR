@@ -14,11 +14,7 @@ class Casco extends THREE.Object3D {
         super();
         this.evaluador = new CSG.Evaluator();
         this.material = new THREE.MeshNormalMaterial();
-
         this.cascoCompleto = this.createCascoCompleto();
-
-        
-        
         this.add(this.cascoCompleto);
     }
 

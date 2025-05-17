@@ -7,18 +7,21 @@ import { TrackballControls } from '../libs/TrackballControls.js'
 import  Stats from '../libs/stats.module.js'
 
 // Clases de mi proyecto
-
-import { PeonMago} from './PeonMago.js'
-import {PeonCaballero} from './PeonCaballero.js'
-
-import { Torre} from './Torre.js'
-import { Rey} from './Rey.js'
+import {Brazos} from './Brazos.js'
+import { Torre } from './Torre.js'
+import { Reina } from './Reina.js'
 import { Caballo } from './Caballo.js'
+import { Rey } from './Rey.js'
 import { Alfil } from './Alfil.js'
+import { PeonCaballero } from './PeonCaballero.js'
+import { PeonMago } from './PeonMago.js'
 
-import { Casilla }  from "./Casilla.js" 
+import { Casilla } from './Casilla.js'
 import { Tablero } from './Tablero.js'
 import { DecoracionTablero } from './DecoracionTablero.js'
+import { Peon } from './Peon.js'
+
+
 
  
 /// La clase fachada del modelo
@@ -55,68 +58,19 @@ class MyScene extends THREE.Scene {
     this.axis = new THREE.AxesHelper (2);
     this.add (this.axis);
 
-    //this.casilla = new Casilla(0,0, 0xA0522D, this.gui, "");
-    //this.add(this.casilla);
-
-    /*this.alfilNegro = new Alfil(0);
-    this.alfilNegro.position.set(0, 0, 0);
-    this.alfilNegro.scale.set(0.25, 0.25, 0.25);
-    //this.add(this.alfilNegro);
-
-    this.alfilBlanco = new Alfil(1);
-    this.alfilBlanco.position.set(0, 0, 0);
-    this.alfilBlanco.scale.set(0.25, 0.25, 0.25);
-    //this.add(this.alfilBlanco);
-
-    this.caballoNegro = new Caballo(0);
-    this.caballoNegro.position.set(0, 0, 0);
-    this.caballoNegro.scale.set(0.25, 0.25, 0.25);
-    //this.add(this.caballoNegro);
-
-    this.caballoBlanco = new Caballo(1);
-    this.caballoBlanco.position.set(0, 0, 0);
-    this.caballoBlanco.scale.set(0.25, 0.25, 0.25);
-    //this.add(this.caballoBlanco);
-
-    this.reyNegro = new Rey(0);
-    this.reyNegro.position.set(0, 0, 0);
-    this.reyNegro.scale.set(0.25, 0.25, 0.25);
-    //this.add(this.reyNegro);
-
-    this.reyBlanco = new Rey(1);
-    this.reyBlanco.position.set(0, 0, 0);
-    this.reyBlanco.scale.set(0.25, 0.25, 0.25);
-    //this.add(this.reyBlanco);
-
-    this.torreNegra = new Torre(0);
-    this.torreNegra.position.set(0, 0, 0);
-    this.torreNegra.scale.set(0.25, 0.25, 0.25);
-    //this.add(this.torreNegra);
-
-    this.torreBlanca = new Torre(1);
-    this.torreBlanca.position.set(0, 0, 0);
-    this.torreBlanca.scale.set(0.25, 0.25, 0.25);
-    //this.add(this.torreBlanca);
-
-    this.PeonCaballero = new PeonCaballero(0);
-    this.PeonCaballero.position.set(0, 0, 0);
-    this.PeonCaballero.scale.set(0.25, 0.25, 0.25);
-    //this.add(this.PeonCaballero);*/
-
-    this.PeonMago = new PeonMago(1);
-    this.PeonMago.position.set(0, 0, 0);
-    this.PeonMago.scale.set(0.2, 0.1, 0.1);
-    //this.add(this.PeonMago);
+    
 
     //TABLERO
     this.tablero = new Tablero();
     this.tablero.position.set(0, 0, 0);
     this.add(this.tablero);
+    this.tablero.setCamera(this.camera);
 
     this.decoracionTablero = new DecoracionTablero();
     this.decoracionTablero.rotateX(Math.PI/2);
     this.decoracionTablero.position.set(0, 0.5, 0);
     this.add(this.decoracionTablero);
+
 
 
 
@@ -321,7 +275,15 @@ $(function () {
 
   // Se añaden los listener de la aplicación. En este caso, el que va a comprobar cuándo se modifica el tamaño de la ventana de la aplicación.
   window.addEventListener ("resize", () => scene.onWindowResize());
+
+  window.addEventListener('click', (event) => {
+    scene.tablero.onPulsacion(event);
+    scene.tablero.pickCasilla(event);
+    
+    
+  });
   
   // Que no se nos olvide, la primera visualización.
   scene.update();
 });
+

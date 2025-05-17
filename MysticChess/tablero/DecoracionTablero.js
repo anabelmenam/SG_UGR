@@ -14,13 +14,13 @@ class DecoracionTablero extends THREE.Object3D {
         texturaMadera.repeat.set(1, 1); 
         texturaMadera.anisotropy = 16;
 
-        const texturaPared = loader.load('./texturas/pared.jpg');
+        const texturaPared = loader.load('./texturas/image.png');
         texturaPared.wrapS = THREE.RepeatWrapping;
         texturaPared.wrapT = THREE.RepeatWrapping;
         texturaPared.repeat.set(10, 1); 
         texturaPared.anisotropy = 16;
 
-        const texturaTorre = loader.load('./texturas/pared.jpg');
+        const texturaTorre = loader.load('./texturas/image.png');
         texturaTorre.wrapS = THREE.RepeatWrapping;
         texturaTorre.wrapT = THREE.RepeatWrapping;
         texturaTorre.anisotropy = 16;

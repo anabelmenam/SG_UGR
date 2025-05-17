@@ -4,16 +4,12 @@ import { color } from '../libs/dat.gui.module.js';
 import * as THREE from '../libs/three.module.js'
 import * as CSG from '../libs/three-bvh-csg.js'
 import { Pieza } from './Pieza.js';
-
-
-
-
+import { Brazos } from './Brazos.js';
 
 class Torre extends Pieza {
 
-    constructor (equipo, casilla) {
-        super(equipo, casilla);
-        
+    constructor (equipo, casilla, nombre, resolucion) {
+        super(equipo, casilla, nombre, resolucion);  
     }
 
     generarGeometria() {
@@ -23,7 +19,6 @@ class Torre extends Pieza {
         //CUERPO
         var cuerpo = this.createCuerpo();
         cuerpo = new CSG.Brush(cuerpo, material);
-
 
         //CABEZA
         var cabeza = this.createCabeza();
@@ -44,14 +39,15 @@ class Torre extends Pieza {
         corte = evaluador.evaluate(corte, corte4, CSG.ADDITION);
         corte = evaluador.evaluate(corte, corte3, CSG.ADDITION);
 
-        var cilindro = new THREE.CylinderGeometry(2,2,4,30);
+        var cilindro = new THREE.CylinderGeometry(2, 2, 4, this.resolucion);
         cilindro.translate(0,13,0);
         var cilindroG = new CSG.Brush(cilindro, material);
         corte = evaluador.evaluate(corte, cilindroG, CSG.ADDITION);
 
-        var toroide = new THREE.TorusGeometry(2,0.2,30,30);
+        var toroide = new THREE.TorusGeometry(2, 0.2, this.resolucion, this.resolucion);
         toroide.rotateX(Math.PI/2);
-        toroide.translate(0,10.8,0);
+        toroide.rotateY(Math.PI/6);
+        toroide.translate(0, 10.8, 0);
 
         toroide = new CSG.Brush(toroide, material);
     
@@ -59,10 +55,29 @@ class Torre extends Pieza {
         cabeza = evaluador.evaluate(cabeza, corte, CSG.SUBTRACTION);
         var figura = evaluador.evaluate(cuerpo, cabeza, CSG.ADDITION);
         figura = evaluador.evaluate(figura, toroide, CSG.ADDITION);
-        
         var geometriaTorre = figura.geometry;
         
         return geometriaTorre;
+    }
+
+    generarBrazos(material, equipo) {
+        const brazos = new Brazos(material,this.resolucion);
+
+        const brazoIzq = brazos.createBrazoIzquierdo(equipo);
+        const brazoDch = brazos.createBrazoDerecho(equipo);
+
+        if(equipo == 1) {
+            brazoIzq.rotation.y = Math.PI;
+            brazoDch.rotation.y = Math.PI;
+        }
+        brazoIzq.position.set(-2.3, 9.5, 0);
+        brazoDch.position.set(2.3, 9.5, 0);
+
+        this.brazoIzq = brazoIzq;
+        this.brazoDch = brazoDch;
+
+        this.add(brazoIzq);
+        this.add(brazoDch);
     }
 
     createCuerpo() {
@@ -76,8 +91,8 @@ class Torre extends Pieza {
         shape.quadraticCurveTo(2,7, 2,11);
         shape.lineTo(0,11);
 
-        var points = shape.extractPoints(40).shape;
-        var geometry = new THREE.LatheGeometry(points, 100);
+        var points = shape.extractPoints(this.resolucion).shape;
+        var geometry = new THREE.LatheGeometry(points, this.resolucion);
         return geometry;
     }
 
@@ -89,8 +104,8 @@ class Torre extends Pieza {
         shape.quadraticCurveTo(3,2.5,3,3);
         shape.lineTo(0,3);
 
-        var points = shape.extractPoints(40).shape;
-        var geometry = new THREE.LatheGeometry(points, 30);
+        var points = shape.extractPoints(this.resolucion).shape;
+        var geometry = new THREE.LatheGeometry(points, this.resolucion);
         geometry.translate(0,10.8,0);
         
         return geometry;
@@ -104,7 +119,7 @@ class Torre extends Pieza {
 
         var options = {
             depth: 8,
-            curveSegments:40,
+            curveSegments:this.resolucion,
             bevelEnabled: false,
         }
 
@@ -137,21 +152,6 @@ class Torre extends Pieza {
         geometry.translate(0,1,0);
         return geometry;
     }
-
-    
-
-
-
-
-
 }
 
-
-
-
-export {Torre};
-
-
-/**
- * Radianes = grados * PI /180
- */
+export { Torre };

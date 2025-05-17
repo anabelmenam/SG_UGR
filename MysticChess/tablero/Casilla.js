@@ -7,7 +7,7 @@ class Casilla extends THREE.Object3D {
         super();
 
         var material = new THREE.MeshStandardMaterial({color: colorCasilla});
-        
+        this.index = [i+3.5, j+3.5];
         this.posI = i;
         this.posJ = j;
         this.pieza = null;
@@ -19,22 +19,30 @@ class Casilla extends THREE.Object3D {
     }
 
     setPieza(pieza) {
-    this.pieza = pieza;
-    try {
-        this.pieza.scale.set(0.08, 0.08, 0.08);
-        this.pieza.position.set(this.posI, 0.5, this.posJ);
-        this.add(this.pieza);
-        console.log("Pieza añadida correctamente");
-    } catch (e) {
-        console.error("Error al añadir pieza en casilla:", this.posI, this.posJ, e);
-    }
-}
-
-    updateGeometria() {
-        this.mesh.geometry.dispose();
-        this.mesh.geometry = new THREE.LatheGeometry(this.points, this.guiControls.resolucion);
+        this.pieza = pieza;
+        try {
+            this.pieza.scale.set(0.08, 0.08, 0.08);
+            this.pieza.position.set(this.posI, 0.5, this.posJ);
+            this.add(this.pieza);
+            console.log("Pieza añadida correctamente");
+        } catch (e) {
+            console.error("Error al añadir pieza en casilla:", this.posI, this.posJ, e);
+        }
     }
 
+    hacerPulsable() {
+        
+    }
+
+    hacerOcupada() {
+        
+    }
+
+    vaciarCasilla() {
+        if (this.pieza != null) {
+            this.pieza = null;
+        }
+    }
 }
 
 

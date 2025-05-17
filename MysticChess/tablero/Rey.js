@@ -1,19 +1,12 @@
-
-
 import { color } from '../libs/dat.gui.module.js';
 import * as THREE from '../libs/three.module.js'
 import * as CSG from '../libs/three-bvh-csg.js'
 import { Pieza } from './Pieza.js';
-
-
-
-
+import { Brazos } from './Brazos.js';
 
 class Rey extends Pieza {
-
-    constructor (equipo, casilla) {
-        super(equipo, casilla);
-        
+    constructor (equipo, casilla, nombre, resolucion) {
+        super(equipo, casilla, nombre, resolucion);   
     }
 
     generarGeometria() {
@@ -24,18 +17,21 @@ class Rey extends Pieza {
         var cuerpo = this.createCuerpo();
         cuerpo = new CSG.Brush(cuerpo, material);
 
-        var toroide1 = new THREE.TorusGeometry(2,0.4,30,30);
+        var toroide1 = new THREE.TorusGeometry(2, 0.4, this.resolucion, this.resolucion);
         toroide1.rotateX(Math.PI/2);
+        toroide1.rotateY(Math.PI/6);
         toroide1.translate(0,9.5,0);
         toroide1 = new CSG.Brush(toroide1, material);
 
-        var toroide2 = new THREE.TorusGeometry(2,0.15,30,30);
+        var toroide2 = new THREE.TorusGeometry(2, 0.15, this.resolucion, this.resolucion);
         toroide2.rotateX(Math.PI/2);
+        toroide2.rotateY(Math.PI/6);
         toroide2.translate(0,10,0);
         toroide2 = new CSG.Brush(toroide2, material);
 
-        var toroide3 = new THREE.TorusGeometry(2,0.15,30,30);
+        var toroide3 = new THREE.TorusGeometry(2, 0.15, this.resolucion, this.resolucion);
         toroide3.rotateX(Math.PI/2);
+        toroide3.rotateX(Math.PI/6);
         toroide3.translate(0,10.7,0);
         toroide3 = new CSG.Brush(toroide3, material);
 
@@ -43,11 +39,12 @@ class Rey extends Pieza {
         var cabeza = this.createCabeza();
         cabeza = new CSG.Brush(cabeza, material);
         
+        // CRUZ
         var centroCruz = new THREE.BoxGeometry(0.7,0.7, 0.7,1);
         centroCruz.translate(0,16.4,0);
         centroCruz = new CSG.Brush(centroCruz, material);
         var geometriaLadoCruz = new THREE.CylinderGeometry(0.4,0.7, 1.5,4);
-        geometriaLadoCruz.rotateY(3*Math.PI / 4);
+        geometriaLadoCruz.rotateY(3*Math.PI/4);
         geometriaLadoCruz.translate(0,15.4,0);
         
         var ladoCruz = new CSG.Brush(geometriaLadoCruz, material);
@@ -58,11 +55,8 @@ class Rey extends Pieza {
             geometriaLadoCruz.translate(16.4,16.4,0);
             ladoCruz = new CSG.Brush(geometriaLadoCruz, material);
             cruz = evaluador.evaluate(cruz, ladoCruz, CSG.ADDITION);
-
         }
 
-        
-    
         //FIGURA FINAL
         var figura = evaluador.evaluate(cuerpo, cabeza, CSG.ADDITION);
         figura = evaluador.evaluate(figura, toroide1, CSG.ADDITION);
@@ -72,6 +66,26 @@ class Rey extends Pieza {
 
         var geometriaRey = figura.geometry;
         return geometriaRey;
+    }
+
+    generarBrazos(material, equipo) {
+        const brazos = new Brazos(material, this.resolucion);
+
+        const brazoIzq = brazos.createBrazoIzquierdo(equipo);
+        const brazoDch = brazos.createBrazoDerecho(equipo);
+
+        if(equipo == 1) {
+            brazoIzq.rotation.y = Math.PI;
+            brazoDch.rotation.y = Math.PI;
+        }
+        brazoIzq.position.set(-2.3, 9.5, 0);
+        brazoDch.position.set(2.3, 9.5, 0);
+
+        this.brazoIzq = brazoIzq;
+        this.brazoDch = brazoDch;
+
+        this.add(brazoIzq);
+        this.add(brazoDch);
     }
 
     createCuerpo() {
@@ -85,8 +99,8 @@ class Rey extends Pieza {
         shape.quadraticCurveTo(2,7, 2,11);
         shape.lineTo(0,11);
 
-        var points = shape.extractPoints(40).shape;
-        var geometry = new THREE.LatheGeometry(points, 100);
+        var points = shape.extractPoints(this.resolucion).shape;
+        var geometry = new THREE.LatheGeometry(points, this.resolucion);
         return geometry;
     }
 
@@ -101,24 +115,10 @@ class Rey extends Pieza {
         shape.quadraticCurveTo(1,3.9, 0.5,4);
         shape.lineTo(0,4);
 
-        var points = shape.extractPoints(40).shape;
-        var geometry = new THREE.LatheGeometry(points, 30);
+        var points = shape.extractPoints(this.resolucion).shape;
+        var geometry = new THREE.LatheGeometry(points, this.resolucion);
         geometry.translate(0,10.8,0);
-
-        
         return geometry;
     }
-
-
-
 }
-
-
-
-
-export {Rey};
-
-
-/**
- * Radianes = grados * PI /180
- */
+export { Rey };

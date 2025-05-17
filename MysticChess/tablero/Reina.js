@@ -2,17 +2,18 @@ import * as THREE from '../libs/three.module.js'
 import * as CSG from '../libs/three-bvh-csg.js'
 
 import { Pieza } from './Pieza.js'
+import { Brazos } from './Brazos.js'
 
 class Reina extends Pieza {
-    constructor (equipo, casilla) {
-        super(equipo, casilla);
+    constructor (equipo, casilla, nombre, resolucion) {
+        super(equipo, casilla, nombre,resolucion);
     }
 
     generarGeometria() {
         this.material = new THREE.MeshNormalMaterial();
 
         //CABEZA
-        this.geometry_cilindro = new THREE.CylinderGeometry(2.6,0.7,3.2);
+        this.geometry_cilindro = new THREE.CylinderGeometry(2.6, 0.7, 3.2, this.resolucion, this.resolucion);
         this.geometry_cilindro.translate(0,14,0);
 
         //CUERPO
@@ -21,8 +22,9 @@ class Reina extends Pieza {
         this.geometry_circunferencia = this.createCircunferenia();
         this.geometry_circunferencia.translate(0,9.8,0);
 
-        this.geometry_toro3 = new THREE.TorusGeometry(1.73,0.1);
+        this.geometry_toro3 = new THREE.TorusGeometry(1.73, 0.1, this.resolucion, this.resolucion);
         this.geometry_toro3.rotateX(Math.PI/2);
+        this.geometry_toro3.rotateY(Math.PI/6);
         this.geometry_toro3.translate(0,10.3,0);
 
         this.geometry_relieve = this.createRelieve();
@@ -36,8 +38,9 @@ class Reina extends Pieza {
         this.geometry_cuerpo2 = this.createCuerpo2();
         this.geometry_cuerpo2.translate(0,8.89,0);
 
-        this.geometry_toro2 = new THREE.TorusGeometry(1,0.11);
+        this.geometry_toro2 = new THREE.TorusGeometry(1, 0.11, this.resolucion, this.resolucion);
         this.geometry_toro2.rotateX(Math.PI/2);
+        this.geometry_toro2.rotateY(Math.PI/6);
         this.geometry_toro2.translate(0,8.9,0);
 
         this.geometry_recorte = this.createRecorte();
@@ -65,7 +68,7 @@ class Reina extends Pieza {
         this.geometry_recorte5.rotateY(-(Math.PI+0.261799)); // 90 GRADOS
         this.geometry_recorte5.translate(0.55,13.8,0);
 
-        this.geometry_esfera = new THREE.SphereGeometry(1.4);
+        this.geometry_esfera = new THREE.SphereGeometry(1.4, this.resolucion, this.resolucion);
         this.geometry_esfera.translate(0,14,0);
 
 
@@ -111,6 +114,26 @@ class Reina extends Pieza {
         return geometria;
     }
 
+    generarBrazos(material, equipo) {
+        const brazos = new Brazos(material, this.resolucion);
+
+        const brazoIzq = brazos.createBrazoIzquierdo(equipo);
+        const brazoDch = brazos.createBrazoDerecho(equipo);
+
+        if(equipo == 1) {
+            brazoIzq.rotation.y = Math.PI;
+            brazoDch.rotation.y = Math.PI;
+        }
+        brazoIzq.position.set(-1.3, 8.5, 0);
+        brazoDch.position.set(1.3, 8.5, 0);
+
+        this.brazoIzq = brazoIzq;
+        this.brazoDch = brazoDch;
+
+        this.add(brazoIzq);
+        this.add(brazoDch);
+    }
+
     createCuerpo() {
         this.shape = new THREE.Shape();
         this.shape.lineTo(4.5,0);
@@ -122,8 +145,8 @@ class Reina extends Pieza {
         this.shape.quadraticCurveTo(1.5,5, 1,9);
         this.shape.lineTo(0,9);
 
-        const points = this.shape.extractPoints(40).shape;
-        this.geometry = new THREE.LatheGeometry(points, 100);
+        const points = this.shape.extractPoints(this.resolucion).shape;
+        this.geometry = new THREE.LatheGeometry(points, this.resolucion);
         return this.geometry;
     }
 
@@ -133,8 +156,8 @@ class Reina extends Pieza {
         this.shape.quadraticCurveTo(0.42,0.7, 1.26,1.26);
         this.shape.lineTo(0, 1.2);
 
-        const points = this.shape.extractPoints(40).shape;
-        this.geometry = new THREE.LatheGeometry(points, 100);
+        const points = this.shape.extractPoints(this.resolucion).shape;
+        this.geometry = new THREE.LatheGeometry(points, this.resolucion);
         return this.geometry;
     }
 
@@ -145,8 +168,8 @@ class Reina extends Pieza {
         this.shape.quadraticCurveTo(1.56,0.99, 1,1);
         this.shape.lineTo(0, 1);
 
-        const points = this.shape.extractPoints(40).shape;
-        this.geometry = new THREE.LatheGeometry(points, 100);
+        const points = this.shape.extractPoints(this.resolucion).shape;
+        this.geometry = new THREE.LatheGeometry(points, this.resolucion);
         return this.geometry;
     }
 
@@ -157,8 +180,8 @@ class Reina extends Pieza {
         this.shape.quadraticCurveTo(0.53,0.59, 0.4,1);
         this.shape.lineTo(0, 1);
 
-        const points = this.shape.extractPoints(40).shape;
-        this.geometry = new THREE.LatheGeometry(points, 100);
+        const points = this.shape.extractPoints(this.resolucion).shape;
+        this.geometry = new THREE.LatheGeometry(points, this.resolucion);
         return this.geometry;
     }
 
@@ -171,7 +194,7 @@ class Reina extends Pieza {
         this.options = {
             depth: 5,
             steps:5,
-            curveSegments: 150,
+            curveSegments: this.resolucion,
             bevelEnabled: false
         }
 
@@ -186,11 +209,10 @@ class Reina extends Pieza {
         this.shape.quadraticCurveTo(0.17,0.44, 0.2,0.6);
         this.shape.quadraticCurveTo(0.19,0.79, 0,0.8);
         this.shape.bezierCurveTo(0.14,0.79, 0.14,0.94, 0.14,1.08);
-
         this.shape.lineTo(0, 1);
 
-        const points = this.shape.extractPoints(40).shape;
-        this.geometry = new THREE.LatheGeometry(points, 100);
+        const points = this.shape.extractPoints(this.resolucion).shape;
+        this.geometry = new THREE.LatheGeometry(points, this.resolucion);
         return this.geometry;
     }
 
@@ -201,18 +223,6 @@ class Reina extends Pieza {
 
         var folder = gui.addFolder(titleGui);
         folder.add(this.guiControls, 'resolucion', 3, 50, 1).name('Resolucion: ').listen().onChange ( () =>this.updateGeometria() );
-    }
-
-    scaleShape(shape, scale) {
-        var points = shape.extractPoints().shape;
-        var scaledPoints = points.map(p => new THREE.Vector2(p.x * scale, p.y * scale));
-        return new THREE.Shape(scaledPoints);
-    }
-    
-    translateShape(shape, dx, dy) {
-        var points = shape.extractPoints().shape;
-        var translatedPoints = points.map(p => new THREE.Vector2(p.x + dx, p.y + dy));
-        return new THREE.Shape(translatedPoints);
     }
 }
 
