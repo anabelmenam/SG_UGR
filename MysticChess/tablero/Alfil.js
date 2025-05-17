@@ -7,7 +7,10 @@ import { Brazos } from './Brazos.js';
 class Alfil extends Pieza {
 
     constructor (equipo, casilla, nombre, resolucion) {
-        super(equipo, casilla, nombre, resolucion);   
+        super(equipo, casilla, nombre, resolucion);
+        this.casillaActual = casilla;
+        this.equipo = equipo;
+        this.resolucion = resolucion;
     }
 
     generarGeometria() {
@@ -78,6 +81,29 @@ class Alfil extends Pieza {
 
         this.add(brazoIzq);
         this.add(brazoDch);
+    }
+
+    movimientosPosibles() {
+        let i,j;
+        let casillas = [];
+
+        
+        for(let x = this.casillaActual.index[0]-1, y = this.casillaActual.index[1]-1; x >= 0 && y >= 0; x--, y--) {
+            casillas.push([x, y]);
+        }
+        for(let x = this.casillaActual.index[0]+1, y = this.casillaActual.index[1]+1; x < 8 && y < 8; x++, y++) {
+            casillas.push([x, y]);
+        }
+        for(let x = this.casillaActual.index[0]-1, y = this.casillaActual.index[1]+1; x >= 0 && y < 8; x--, y++) {
+            casillas.push([x, y]);
+        }
+        for(let x = this.casillaActual.index[0]+1, y = this.casillaActual.index[1]-1; x < 8 && y >= 0; x++, y--) {
+            casillas.push([x, y]);
+        }
+
+        
+        
+        return casillas;
     }
 
     createCuerpo() {

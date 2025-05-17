@@ -9,7 +9,10 @@ import { Brazos } from './Brazos.js';
 class Torre extends Pieza {
 
     constructor (equipo, casilla, nombre, resolucion) {
-        super(equipo, casilla, nombre, resolucion);  
+        super(equipo, casilla, nombre, resolucion);
+        this.casillaActual = casilla;
+        this.equipo = equipo;
+        this.resolucion = resolucion;
     }
 
     generarGeometria() {
@@ -58,6 +61,33 @@ class Torre extends Pieza {
         var geometriaTorre = figura.geometry;
         
         return geometriaTorre;
+    }
+
+    movimientosPosibles() {
+        let i,j;
+        let casillas = [];
+
+        j= this.casillaActual.index[1];
+        for(let x = this.casillaActual.index[0]-1; x >= 0; x--) {
+            casillas.push([x, j]);
+        }
+        for(let x = this.casillaActual.index[0]+1; x < 8; x++) {
+            casillas.push([x, j]);
+        }
+
+        i = this.casillaActual.index[0];
+        for(let y = this.casillaActual.index[1]-1; y >= 0; y--) {
+            casillas.push([i, y]);
+        }
+        for(let y = this.casillaActual.index[1]+1; y < 8; y++) {
+            casillas.push([i, y]);
+        }
+        
+        
+
+        
+        
+        return casillas;
     }
 
     generarBrazos(material, equipo) {

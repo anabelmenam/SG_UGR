@@ -6,7 +6,10 @@ import { Brazos } from './Brazos.js'
 
 class Reina extends Pieza {
     constructor (equipo, casilla, nombre, resolucion) {
-        super(equipo, casilla, nombre,resolucion);
+        super(equipo, casilla, nombre, resolucion);
+        this.casillaActual = casilla;
+        this.equipo = equipo;
+        this.resolucion = resolucion;
     }
 
     generarGeometria() {
@@ -114,6 +117,44 @@ class Reina extends Pieza {
         return geometria;
     }
 
+    movimientosPosibles() {
+        let i,j;
+        let casillas = [];
+
+        j= this.casillaActual.index[1];
+        for(let x = this.casillaActual.index[0]-1; x >= 0; x--) {
+            casillas.push([x, j]);
+        }
+        for(let x = this.casillaActual.index[0]+1; x < 8; x++) {
+            casillas.push([x, j]);
+        }
+
+        i = this.casillaActual.index[0];
+        for(let y = this.casillaActual.index[1]-1; y >= 0; y--) {
+            casillas.push([i, y]);
+        }
+        for(let y = this.casillaActual.index[1]+1; y < 8; y++) {
+            casillas.push([i, y]);
+        }
+        
+        for(let x = this.casillaActual.index[0]-1, y = this.casillaActual.index[1]-1; x >= 0 && y >= 0; x--, y--) {
+            casillas.push([x, y]);
+        }
+        for(let x = this.casillaActual.index[0]+1, y = this.casillaActual.index[1]+1; x < 8 && y < 8; x++, y++) {
+            casillas.push([x, y]);
+        }
+        for(let x = this.casillaActual.index[0]-1, y = this.casillaActual.index[1]+1; x >= 0 && y < 8; x--, y++) {
+            casillas.push([x, y]);
+        }
+        for(let x = this.casillaActual.index[0]+1, y = this.casillaActual.index[1]-1; x < 8 && y >= 0; x++, y--) {
+            casillas.push([x, y]);
+        }
+
+        
+        
+        return casillas;
+    }
+
     generarBrazos(material, equipo) {
         const brazos = new Brazos(material, this.resolucion);
 
@@ -216,14 +257,7 @@ class Reina extends Pieza {
         return this.geometry;
     }
 
-    createGui (gui, titleGui) {
-        this.guiControls = {
-            resolucion: 20,
-        }
 
-        var folder = gui.addFolder(titleGui);
-        folder.add(this.guiControls, 'resolucion', 3, 50, 1).name('Resolucion: ').listen().onChange ( () =>this.updateGeometria() );
-    }
 }
 
 export { Reina };

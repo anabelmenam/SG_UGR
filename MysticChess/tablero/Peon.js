@@ -10,6 +10,17 @@ class Peon extends Pieza {
 
     constructor (equipo, casilla, nombre, resolucion) {
         super(equipo, casilla, nombre, resolucion);
+        this.casillaActual = casilla;
+        this.casillaInicial = casilla;
+        this.equipo = equipo;
+        this.resolucion = resolucion;
+        this.primerMovimiento = true;
+
+
+        //HABRIA QUE IMPLEMENTARLO EN ALGUN LADO, AUN NO SE DONDE
+        if(this.casillaActual !==this.casillaInicial) {
+            this.primerMovimiento = false;
+        }
     }
 
     generarGeometria() {
@@ -77,6 +88,29 @@ class Peon extends Pieza {
         var points = shape.extractPoints(this.resolucion).shape;
         var geometry = new THREE.LatheGeometry(points, this.resolucion);
         return geometry;
+    }
+
+    movimientosPosibles() {
+        let i,j;
+        let casillas = [];
+        i = this.casillaActual.index[0];
+        if (this.equipo == 1) {
+            j = this.casillaActual.index[1]-1;
+        } else if (this.equipo == 0) {
+            j = this.casillaActual.index[1]+1;
+        }
+        casillas.push([i,j]);
+
+        if(this.primerMovimiento) {
+            if (this.equipo == 1) {
+                j = this.casillaActual.index[1]-2;
+            } else if (this.equipo == 0) {
+                j = this.casillaActual.index[1]+2;
+            }
+            casillas.push([i,j]);
+        }
+        
+        return casillas;
     }
 
     generarBrazos(material, equipo) {
