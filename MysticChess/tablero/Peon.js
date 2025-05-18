@@ -32,7 +32,7 @@ class Peon extends Pieza {
             j = this.casillaActual.index[1]+1;
         }
         if(j<8 && j>=0){
-            casillasDisp[i][j].pieza === null || casillasDisp[i][j].pieza.equipo === this.equipo ? casillas.push(casillasDisp[i][j]) : "" ;
+            casillasDisp[i][j].pieza === null  ? casillas.push(casillasDisp[i][j]) : "" ;
         }
 
         if(this.casillaActual.index[0]-1 >= 0) {
@@ -47,13 +47,19 @@ class Peon extends Pieza {
         }   
         
         i = this.casillaActual.index[0];
-        if(this.primerMovimiento) {
+        if (this.primerMovimiento) {
             if (this.equipo == 1) {
                 j = this.casillaActual.index[1]-2;
+                if (casillasDisp[i][j+1].pieza === null) {
+                    casillasDisp[i][j].pieza === null ? casillas.push(casillasDisp[i][j]) : "";
+                }
             } else if (this.equipo == 0) {
                 j = this.casillaActual.index[1]+2;
+                if (casillasDisp[i][j-1].pieza === null) {
+                    casillasDisp[i][j].pieza === null ? casillas.push(casillasDisp[i][j]) : "";
+                }
             }
-            casillasDisp[i][j].pieza === null || casillasDisp[i][j].pieza.equipo === this.equipo ? casillas.push(casillasDisp[i][j]) : "";
+            //casillasDisp[i][j].pieza === null ? casillas.push(casillasDisp[i][j]) : "";
         }
 
         return casillas;

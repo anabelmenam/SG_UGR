@@ -9,6 +9,7 @@ import  Stats from '../libs/stats.module.js'
 // Clases de mi proyecto
 import { Tablero } from './Tablero.js'
 import { DecoracionTablero } from './DecoracionTablero.js'
+import TWEEN  from '../libs/tween.module.js'
 
 class MyScene extends THREE.Scene {
   constructor (myCanvas) {
@@ -27,31 +28,46 @@ class MyScene extends THREE.Scene {
 
     //TABLERO
     this.tablero = new Tablero();
-    this.tablero.position.set(0, 0, 0);
+    this.tablero.position.set(-3.5, -0.5, -3.5);
     this.add(this.tablero);
     this.tablero.setCamera(this.camera);
 
     this.decoracionTablero = new DecoracionTablero();
     this.decoracionTablero.rotateX(Math.PI/2);
-    this.decoracionTablero.position.set(3.5, 0.5, 3.5);
     this.add(this.decoracionTablero);
-
 
     // VARIABLES PARA ANIMACION DE CAMARA
     this.isCameraRotating = false;
     this.rotationAngle = 0;
     this.rotationSpeed = Math.PI / 90; // velocidad del giro
-    this.rotationCenter = new THREE.Vector3(3.5, 0, 3.5); // centro del tablero
+    this.rotationCenter = new THREE.Vector3(0, 0, 0); // centro del tablero
     this.cameraRadius = this.camera.position.distanceTo(this.rotationCenter);
     this.startRotationVector = new THREE.Vector3(); // se usará para guardar la posición inicial
     
 
-    this.tablero.onCambioTurno = () => {
-      this.isCameraRotating = true;
+    this.tablero.onCambioTurno = (turnoEquipo) => {
+      // Elegir posición base según el equipo al que VA el turno
+      const targetPos = (turnoEquipo === 0) ? this.cameraPosBlancas : this.cameraPosNegras;
+
+      // Restaurar posición y orientación base
+      this.camera.position.copy(targetPos);
+      this.camera.lookAt(this.rotationCenter);
+      this.camera.up.set(0, 1, 0);
+      this.cameraControl.target.copy(this.rotationCenter);
+      this.cameraControl.update();
+
+      // Dirección de rotación: blancas = 1 (horario), negras = -1 (antihorario)
+      this.rotationDirection = (turnoEquipo === 0) ? 1 : -1;
+
+      // Preparar rotación
       this.rotationAngle = 0;
       this.cameraRadius = this.camera.position.distanceTo(this.rotationCenter);
       this.startRotationVector.subVectors(this.camera.position, this.rotationCenter);
+
+      this.isCameraRotating = true;
     };
+
+
     
   }
   
@@ -74,8 +90,8 @@ class MyScene extends THREE.Scene {
   createCamera () {
   
     this.camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 50);
-    this.camera.position.set (3, 16, 18);
-    var look = new THREE.Vector3 (3 , -2, 1);     // Y hacia dónde mira
+    this.camera.position.set (0, 16, 16);
+    var look = new THREE.Vector3 (0 , 0, 0);     // Y hacia dónde mira
 
     this.camera.lookAt(look);
     this.add (this.camera);
@@ -89,6 +105,11 @@ class MyScene extends THREE.Scene {
     this.cameraControl.panSpeed = 0.2;
 
     this.cameraControl.target = look; // Debe orbitar con respecto al punto de mira de la cámara
+
+    //Posiciones camaras partida
+    this.cameraPosBlancas = new THREE.Vector3(0, 16, 18);
+    this.cameraPosNegras = new THREE.Vector3(0, 16, -18);
+
   }
   
   createBackground() {
@@ -134,22 +155,13 @@ class MyScene extends THREE.Scene {
   }
   
   createLights () {
-    // Se crea una luz ambiental, evita que se vean complentamente negras las zonas donde no incide de manera directa una fuente de luz
-    // La luz ambiental solo tiene un color y una intensidad
-    // Se declara como   var   y va a ser una variable local a este método
-    //    se hace así puesto que no va a ser accedida desde otros métodos
-    this.ambientLight = new THREE.AmbientLight('white', this.guiControls.ambientIntensity);
-    // La añadimos a la escena
-    this.add (this.ambientLight);
-    
-    // Se crea una luz focal que va a ser la luz principal de la escena
-    // La luz focal, además tiene una posición, y un punto de mira
-    // Si no se le da punto de mira, apuntará al (0,0,0) en coordenadas del mundo
-    // En este caso se declara como   this.atributo   para que sea un atributo accesible desde otros métodos.
-    this.pointLight = new THREE.PointLight( 0xffffff );
-    this.pointLight.power = this.guiControls.lightPower;
-    this.pointLight.position.set( 2, 3, 1 );
-    this.add (this.pointLight);
+     const directionalLight = new THREE.DirectionalLight( 0xffffff, 0.3 );
+				directionalLight.position.set( 1, 4, 3 ).multiplyScalar( 3 );
+				directionalLight.castShadow = true;
+				directionalLight.shadow.mapSize.setScalar( 2048 );
+				directionalLight.shadow.bias = - 1e-4;
+				directionalLight.shadow.normalBias = 1e-4;
+				this.add( directionalLight ); 
   }
   
   setLightPower (valor) {
@@ -165,53 +177,34 @@ class MyScene extends THREE.Scene {
   }
   
   createRenderer (myCanvas) {
-    // Se recibe el lienzo sobre el que se van a hacer los renderizados. Un div definido en el html.
-    
-    // Se instancia un Renderer   WebGL
-    var renderer = new THREE.WebGLRenderer();
-    
-    // Se establece un color de fondo en las imágenes que genera el render
-    renderer.setClearColor(new THREE.Color(0xEEEEEE), 1.0);
-    
-    // Se establece el tamaño, se aprovecha la totalidad de la ventana del navegador
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    
-    // La visualización se muestra en el lienzo recibido
+    var renderer = new THREE.WebGLRenderer();    
+    renderer.setClearColor(new THREE.Color(0xEEEEEE), 1.0);    
+    renderer.setSize(window.innerWidth, window.innerHeight);    
     $(myCanvas).append(renderer.domElement);
     
     return renderer;  
   }
   
   getCamera () {
-    // En principio se devuelve la única cámara que tenemos
-    // Si hubiera varias cámaras, este método decidiría qué cámara devuelve cada vez que es consultado
     return this.camera;
   }
   
   setCameraAspect (ratio) {
-    // Cada vez que el usuario modifica el tamaño de la ventana desde el gestor de ventanas de
-    // su sistema operativo hay que actualizar el ratio de aspecto de la cámara
     this.camera.aspect = ratio;
-    // Y si se cambia ese dato hay que actualizar la matriz de proyección de la cámara
     this.camera.updateProjectionMatrix();
   }
   
   onWindowResize () {
-    // Este método es llamado cada vez que el usuario modifica el tamapo de la ventana de la aplicación
-    // Hay que actualizar el ratio de aspecto de la cámara
-    this.setCameraAspect (window.innerWidth / window.innerHeight);
-    
-    // Y también el tamaño del renderizador
+    this.setCameraAspect (window.innerWidth / window.innerHeight);    
     this.renderer.setSize (window.innerWidth, window.innerHeight);
   }
 
   update () {
-    if (this.stats) this.stats.update();
-  
-    // Desactivar controles mientras la cámara se mueve
+    TWEEN.update();
+
+    if (this.stats) this.stats.update();  
     this.cameraControl.enabled = !(this.isCameraMoving || this.isCameraRotating);
   
-    // Movimiento de cámara para el turno de blancas
     if (this.isCameraMoving) {
       this.cameraLerpAlpha += 0.01;
       if (this.cameraLerpAlpha >= 1) {
@@ -226,7 +219,6 @@ class MyScene extends THREE.Scene {
   
     }
   
-    // Rotación de cámara para el turno de negras
     else if (this.isCameraRotating) {
       const totalRotation = Math.PI;
       const deltaAngle = this.rotationSpeed;
@@ -235,10 +227,9 @@ class MyScene extends THREE.Scene {
       if (this.rotationAngle >= totalRotation) {
         this.rotationAngle = totalRotation;
         this.isCameraRotating = false;
-        console.log("Animación de rotación (negras) finalizada.");
       }
   
-      const angle = this.rotationAngle;
+      const angle = this.rotationAngle * this.rotationDirection;
       const x = this.startRotationVector.x * Math.cos(angle) - this.startRotationVector.z * Math.sin(angle);
       const z = this.startRotationVector.x * Math.sin(angle) + this.startRotationVector.z * Math.cos(angle);
   
@@ -246,22 +237,13 @@ class MyScene extends THREE.Scene {
       this.camera.position.copy(newPos);
       this.camera.lookAt(this.rotationCenter);
       this.cameraControl.target.copy(this.rotationCenter);
-      this.cameraControl.update();
-  
-      console.log(`Rotación: ${(this.rotationAngle * 180 / Math.PI).toFixed(2)}°`);
+      this.cameraControl.update();  
     }
   
-    // Sin animación, solo control manual
     else {
       this.cameraControl.update();
     }
-  
-    // Logs de posición y punto de mira
-    const pos = this.camera.position;
-    const look = this.cameraControl.target;
-    console.log(`Posición cámara: x=${pos.x.toFixed(2)}, y=${pos.y.toFixed(2)}, z=${pos.z.toFixed(2)}`);
-    console.log(`Look at (target): x=${look.x.toFixed(2)}, y=${look.y.toFixed(2)}, z=${look.z.toFixed(2)}`);
-  
+    
     this.renderer.render(this, this.getCamera());
     requestAnimationFrame(() => this.update());
   }
@@ -270,7 +252,6 @@ class MyScene extends THREE.Scene {
   
 }
 
-/// La función   main
 $(function () {
   var scene = new MyScene("#WebGL-output");
   window.addEventListener ("resize", () => scene.onWindowResize());

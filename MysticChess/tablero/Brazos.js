@@ -76,14 +76,14 @@ class Brazos extends THREE.Object3D {
         antebrazo.add(mano);
 
         //ESPADA
-        /*if(equipo == 0) {
+        if(equipo == 0) {
             Espada.loadEspada((espada) => {
                 
                 mano.add(espada);
             });
             
         }
-        else {
+        /*else {
             Varita.loadVarita((varita) => {
                 
                 mano.add(varita);

@@ -2,7 +2,7 @@ import * as THREE from '../libs/three.module.js';
 import * as CSG from '../libs/three-bvh-csg.js';
 
 class Casilla extends THREE.Object3D {
-    constructor(i, j, colorCasilla) {
+    constructor(i, j, colorCasilla, cementerio = false) {
         super();
 
         this.colorPredeterminado = colorCasilla;
@@ -10,7 +10,19 @@ class Casilla extends THREE.Object3D {
         this.index = [i, j];
         this.posI = i;
         this.posJ = j;
-        this.pieza = null;
+        this.pieza = null;       
+        
+        if (cementerio == true) {
+            this.material = new THREE.MeshBasicMaterial({
+                color: 0x000000,
+                transparent: true,
+                opacity: 0.0
+            });
+        } else {
+            this.material = new THREE.MeshStandardMaterial({color: colorCasilla});
+
+        }
+        
         var mesh = new THREE.BoxGeometry(1,1,1);
         mesh.translate(this.posI, 0, this.posJ);
         var mesh = new THREE.Mesh (mesh, this.material);

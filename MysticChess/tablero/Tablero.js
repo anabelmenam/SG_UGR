@@ -1,7 +1,6 @@
 
 import * as THREE from '../libs/three.module.js';
 import { Casilla } from './Casilla.js';
-
 import { Caballo } from './Caballo.js';
 import { Torre } from './Torre.js';
 import { Alfil } from './Alfil.js';
@@ -9,6 +8,7 @@ import { Reina } from './Reina.js';
 import { Rey } from './Rey.js';
 import { PeonCaballero } from './PeonCaballero.js';
 import { PeonMago } from './PeonMago.js';
+import {Animator} from './Animator.js';
 
 class Tablero extends THREE.Object3D {
     constructor() {
@@ -20,6 +20,8 @@ class Tablero extends THREE.Object3D {
         var material = new THREE.MeshNormalMaterial();
         this.casillas = [];
         this.caminoPulsable = [];
+
+        this.animator = new Animator();
 
         this.raycaster = new THREE.Raycaster();
         this.mouse = new THREE.Vector2();
@@ -42,6 +44,7 @@ class Tablero extends THREE.Object3D {
         }
 
         this.inicializarTablero();
+        this.inicializarCementerios();
         this.generarPulsables();
     }
 
@@ -128,98 +131,145 @@ class Tablero extends THREE.Object3D {
                 this.destacarCamino();
             }
 
-            return; // Ya se ha gestionado el clic
+            return;
         }
 
-        // Si no pulsamos una pieza, puede ser una casilla válida del camino
+        // Si no pulsamos una pieza, puede ser una casilla valida del camino
         if (this.piezaPulsada && this.caminoPulsable.length > 0) {
             const casillasPulsadas = this.raycaster.intersectObjects(this.caminoPulsable, true);
             if (casillasPulsadas.length > 0) {
                 const casilla = casillasPulsadas[0].object.userData.casilla;
                 if (casilla && casilla !== this.piezaSeleccionada.casilla) {
-                    this.piezaSeleccionada.moverPieza(casilla);
-                    this.piezaSeleccionada.position.y = 0.5;
-                    this.reiniciarCamino();
-                    this.piezaSeleccionada = null;
-                    this.piezaPulsada = false;
-                    this.pasarTurno();
-                    this.generarPulsables();
+                    //Si la casilla tiene una pieza, la comemos
+                    if(casilla.pieza != null) {
+                        if(this.piezaSeleccionada instanceof Torre) {
+                            this.combateTorre(casilla.pieza);
+                        }
+                        this.comerPieza(casilla.pieza);
+                    }
+                    var wait = $.Deferred();
+                    const from = this.piezaSeleccionada.position;
+                    const to = new THREE.Vector3(casilla.posI, 0.5, casilla.posJ);
+
+                    this.animator.setAndStart(from, to, 500, wait);
+                    wait.done(() => {
+                        this.piezaSeleccionada.moverPieza(casilla);
+                        this.piezaSeleccionada.position.y = 0.5;
+                        this.reiniciarCamino();
+                        this.piezaSeleccionada = null;
+                        this.piezaPulsada = false;
+                        this.pasarTurno();
+                        this.generarPulsables();
+                    })
                 }
             }
         }
     }
 
+    combateTorre(piezaObjetivo) {
+        let cementerio = piezaObjetivo.equipo === 0 ? this.cementerioBlancas.pop() : this.cementerioNegras.pop();
+        const torre = this.piezaSeleccionada;
+        
+        const torrePos = torre.position.clone();
+        const objetivoPos = piezaObjetivo.position.clone();
 
-    /*onPulsacion(event) {
-        this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        this.mouse.y = 1 - 2 * (event.clientY / window.innerHeight);
-    
-        this.raycaster.setFromCamera(this.mouse, this.camera);
-        this.objetosPulsados = this.raycaster.intersectObjects(this.piezasPulsables, true);
-    
-        if (this.objetosPulsados.length > 0) {
-            const intersect = this.objetosPulsados[0];
-            const piezaActual = intersect.object.userData.pieza;
-    
-            if (this.piezaPulsada && piezaActual === this.piezaSeleccionada) {
-                // Deseleccionar la pieza si se vuelve a pulsar la misma
-                this.reiniciarCamino();
-                this.piezaSeleccionada.position.y = 0.5; // devuelve a altura normal
-                this.piezaPulsada = false;
-                this.piezaSeleccionada = null;
-                return;
-            }
-    
-            // Si se selecciona una pieza distinta
-            this.reiniciarCamino(); // Limpia caminos anteriores si los hay
-            if(this.piezaSeleccionada) {
-                this.piezaSeleccionada.position.y= 0.5;
-            }
-                
-    
-            if (piezaActual) {
-                this.piezaSeleccionada = piezaActual;
-                this.piezaPulsada = true;
-                this.piezaSeleccionada.position.y = 1;
-    
-                this.caminoPulsable = this.piezaSeleccionada.movimientosPosibles(this.casillas);
-                //this.caminoPulsable = this.camnino.filter((casilla) => casilla.pieza === null);
-                this.destacarCamino();
-    
-                // Solo añadir listener una vez
-                if (!this.casillaListenerAdded) {
-                    this.casillaListenerAdded = true;
-                    window.addEventListener('click', (evento) => {
-                        this.onPulsacionCasilla(evento);
-                    });
-                }
-            }
+        // Posición delante del objetivo (dependiendo de la dirección X o Z)
+        const frente = objetivoPos.clone();
+        if (Math.abs(torrePos.x - objetivoPos.x) > Math.abs(torrePos.z - objetivoPos.z)) {
+            frente.x += torrePos.x < objetivoPos.x ? -1 : 1;
+        } else {
+            frente.z += torrePos.z < objetivoPos.z ? -1 : 1;
         }
+
+        const wait1 = $.Deferred();
+        const wait2 = $.Deferred();
+        const waitFinal = $.Deferred();
+
+        // Paso 1: La torre se mueve frente al objetivo
+        this.animator.setAndStart(torrePos, frente, 500, wait1);
+
+        wait1.done(() => {
+            // Paso 2: Mover brazo de espada
+            /*if (torre.brazoDch) {
+                torre.brazoDch.rotation.z = -Math.PI / 4;
+            }
+            setTimeout(() => {
+                if (torre.brazoDch) {
+                    torre.brazoDch.rotation.z = -2 * Math.PI / 4;
+                }
+                // Paso 3: Matar ficha objetivo y mandarla al cementerio
+                this.animator.mandarCementerio(piezaObjetivo.position.clone(), new THREE.Vector3(cementerio.posI, 0.5, cementerio.posJ), 500, wait2);
+
+                wait2.done(() => {
+                    piezaObjetivo.rotation.y = -Math.PI / 2;
+                    cementerio.setPieza(piezaObjetivo);
+
+                    // Brazo vuelve a posición original
+                    if (torre.brazoDch) {
+                        torre.brazoDch.rotation.z = -Math.PI / 4;
+                    }
+
+                    waitFinal.resolve();
+                });
+            }, 500);*/
+            piezaObjetivo.rotation.y = -Math.PI / 2;
+            cementerio.setPieza(piezaObjetivo);
+        });
+
+        waitFinal.done(() => {
+            // Finalizar turno o movimiento
+            const destino = piezaObjetivo.casillaActual;
+            torre.moverPieza(destino);
+            torre.position.set(destino.posI, 0.5, destino.posJ);
+            this.reiniciarCamino();
+            this.piezaSeleccionada = null;
+            this.piezaPulsada = false;
+            this.pasarTurno();
+            this.generarPulsables();
+        });
     }
-    
 
-    onPulsacionCasilla(event) {
-        if (this.piezaPulsada) { // Si hay una pieza seleccionada
-            this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-            this.mouse.y = 1 - 2 * (event.clientY / window.innerHeight);
 
-            this.raycaster.setFromCamera(this.mouse, this.camera);
-            this.casillasPulsadas = this.raycaster.intersectObjects(this.caminoPulsable, true);
-            
-            if (this.casillasPulsadas.length > 0) {
-                this.intersectCasilla = this.casillasPulsadas[0];
-                const casilla = this.intersectCasilla.object.userData.casilla;
-                if (casilla && casilla !== this.piezaSeleccionada.casilla) {
-                    this.piezaSeleccionada.moverPieza(casilla);
-                    this.pasarTurno();
-                    
-                }
-                
-                this.reiniciarCamino();
-            }    
+    comerPieza(pieza) {
+        let cementerio = null;
+        if (pieza.equipo === 0) {
+            cementerio = this.cementerioBlancas.pop();
+        } else {
+            cementerio = this.cementerioNegras.pop();
         }
-    }*/
 
+        // ANIMACIÓN EN TRES PASOS
+        const wait1 = $.Deferred();
+        const wait2 = $.Deferred();
+        const wait3 = $.Deferred();
+
+        const piezaPos = pieza.position; // Este será el objeto animado
+
+        const subida = piezaPos.clone();
+        subida.y = 2;
+
+        const desplazamiento = new THREE.Vector3(cementerio.posI, 2, cementerio.posJ);
+
+        const bajada = new THREE.Vector3(cementerio.posI, 0.5, cementerio.posJ);
+
+        this.animator.setAndStart(piezaPos, subida, 250, wait1);
+
+        wait1.done(() => {
+            this.animator.setAndStart(piezaPos, desplazamiento, 500, wait2);
+        });
+
+        wait2.done(() => {
+            this.animator.setAndStart(piezaPos, bajada, 250, wait3);
+        });
+
+        wait3.done(() => {
+            pieza.rotation.y = -Math.PI / 2;
+            cementerio.setPieza(pieza);
+        });
+    }
+
+
+       
     destacarCamino() {
         for (let i = 0; i < this.caminoPulsable.length; i++) {
             const casilla = this.caminoPulsable[i];
@@ -234,8 +284,36 @@ class Tablero extends THREE.Object3D {
             const casilla = this.caminoPulsable[i];
             casilla.retomarColor();
         }
-    
         this.caminoPulsable = [];
+    }
+
+    inicializarCementerios() {
+        const blanco = new THREE.Color(0xffffff);
+        this.cementerioBlancas = [];
+        this.cementerioNegras = [];
+        
+        // Cementerio de blancas (izquierda)
+        for (let i=0; i<2; i++) {
+            for (let j=0; j<8; j++) {
+                let casilla = new Casilla(-3-i, j, blanco, true);
+                this.cementerioNegras.push(casilla);
+                this.add(casilla);
+            }
+        }
+    
+        // Cementerio de negras (derecha)
+        for (let i=0; i<2; i++) {
+            for (let j=0; j < 8; j++) {
+                let casilla = new Casilla(10+i, j, blanco, true);
+                this.cementerioBlancas.push(casilla);
+                this.add(casilla);
+            }
+        } 
+    }
+    
+
+    comerFicha() {
+
     }
     
 

@@ -14,10 +14,10 @@ class Pieza extends THREE.Object3D {
         var material = null;
 
         if(equipo == 0) {
-            const materialNegroSuave = new THREE.MeshStandardMaterial({ color: 0x555555 });
+            const materialNegroSuave = new THREE.MeshBasicMaterial({ color: 0x555555, metalness: 0.8, roughness: 0.6 });
             material = materialNegroSuave;
         } else if (equipo == 1) {
-            const materialBlancoRoto = new THREE.MeshStandardMaterial({ color: 0xEEE8DC });
+            const materialBlancoRoto = new THREE.MeshBasicMaterial({ color: 0xEEE8DC, metalness: 0.8, roughness: 0.6 });
             material = materialBlancoRoto;
         }
     
@@ -39,33 +39,17 @@ class Pieza extends THREE.Object3D {
     }
     
     moverPieza(casilla) {
-        //this.mesh.position.set(casilla.posI,0,casilla.posJ); // X Y Z
         this.casillaActual.vaciarCasilla();
-        
         this.casillaActual = casilla;
         this.casillaActual.setPieza(this);
     }
-
+    
     generarGeometria() {
         throw new Error('El método generarGeometria() debe ser implementado por la subclase.');
     }
     
     generarBrazos(material, equipo) {
         throw new Error('El método generarBrazos() debe ser implementado por la subclase.');
-    }
-
-    createGUI (gui, titleGui) {
-        this.guiControls = {
-            resolucion: 20,
-        }
-
-        var folder = gui.addFolder(titleGui);
-        folder.add(this.guiControls, 'resolucion', 3, 50, 1).name('Resolucion: ').listen().onChange ( () =>this.updateGeometria() );
-    }
-
-    updateGeometria() {
-        this.mesh.geometry.dispose();
-        this.mesh.geometry = this.generarGeometria();
     }
 
 }
