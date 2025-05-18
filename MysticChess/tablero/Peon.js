@@ -15,12 +15,48 @@ class Peon extends Pieza {
         this.equipo = equipo;
         this.resolucion = resolucion;
         this.primerMovimiento = true;
+        
+    }
 
-
-        //HABRIA QUE IMPLEMENTARLO EN ALGUN LADO, AUN NO SE DONDE
-        if(this.casillaActual !==this.casillaInicial) {
+    movimientosPosibles(casillasDisp) {
+        if(this.casillaActual !== this.casillaInicial) {
             this.primerMovimiento = false;
         }
+
+        let i,j;
+        let casillas = [];
+        i = this.casillaActual.index[0];
+        if (this.equipo == 1) {
+            j = this.casillaActual.index[1]-1;
+        } else if (this.equipo == 0) {
+            j = this.casillaActual.index[1]+1;
+        }
+        if(j<8 && j>=0){
+            casillasDisp[i][j].pieza === null || casillasDisp[i][j].pieza.equipo === this.equipo ? casillas.push(casillasDisp[i][j]) : "" ;
+        }
+
+        if(this.casillaActual.index[0]-1 >= 0) {
+            i = this.casillaActual.index[0]-1;
+            casillasDisp[i][j].pieza !== null && casillasDisp[i][j].pieza?.equipo !== this.equipo ? casillas.push(casillasDisp[i][j]) : "";
+        
+        }
+        if(this.casillaActual.index[0]+1 < 8) {
+            i = this.casillaActual.index[0]+1;
+            casillasDisp[i][j].pieza !== null && casillasDisp[i][j].pieza?.equipo !== this.equipo ? casillas.push(casillasDisp[i][j]) : "";
+
+        }   
+        
+        i = this.casillaActual.index[0];
+        if(this.primerMovimiento) {
+            if (this.equipo == 1) {
+                j = this.casillaActual.index[1]-2;
+            } else if (this.equipo == 0) {
+                j = this.casillaActual.index[1]+2;
+            }
+            casillasDisp[i][j].pieza === null || casillasDisp[i][j].pieza.equipo === this.equipo ? casillas.push(casillasDisp[i][j]) : "";
+        }
+
+        return casillas;
     }
 
     generarGeometria() {
@@ -88,29 +124,6 @@ class Peon extends Pieza {
         var points = shape.extractPoints(this.resolucion).shape;
         var geometry = new THREE.LatheGeometry(points, this.resolucion);
         return geometry;
-    }
-
-    movimientosPosibles() {
-        let i,j;
-        let casillas = [];
-        i = this.casillaActual.index[0];
-        if (this.equipo == 1) {
-            j = this.casillaActual.index[1]-1;
-        } else if (this.equipo == 0) {
-            j = this.casillaActual.index[1]+1;
-        }
-        casillas.push([i,j]);
-
-        if(this.primerMovimiento) {
-            if (this.equipo == 1) {
-                j = this.casillaActual.index[1]-2;
-            } else if (this.equipo == 0) {
-                j = this.casillaActual.index[1]+2;
-            }
-            casillas.push([i,j]);
-        }
-        
-        return casillas;
     }
 
     generarBrazos(material, equipo) {

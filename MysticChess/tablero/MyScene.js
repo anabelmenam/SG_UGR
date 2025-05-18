@@ -7,56 +7,21 @@ import { TrackballControls } from '../libs/TrackballControls.js'
 import  Stats from '../libs/stats.module.js'
 
 // Clases de mi proyecto
-import {Brazos} from './Brazos.js'
-import { Torre } from './Torre.js'
-import { Reina } from './Reina.js'
-import { Caballo } from './Caballo.js'
-import { Rey } from './Rey.js'
-import { Alfil } from './Alfil.js'
-import { PeonCaballero } from './PeonCaballero.js'
-import { PeonMago } from './PeonMago.js'
-
-import { Casilla } from './Casilla.js'
 import { Tablero } from './Tablero.js'
 import { DecoracionTablero } from './DecoracionTablero.js'
-import { Peon } from './Peon.js'
-
-
-
- 
-/// La clase fachada del modelo
-/**
- * Usaremos una clase derivada de la clase Scene de Three.js para llevar el control de la escena y de todo lo que ocurre en ella.
- */
 
 class MyScene extends THREE.Scene {
   constructor (myCanvas) {
     super();
     
-    // Lo primero, crear el visualizador, pasándole el lienzo sobre el que realizar los renderizados.
     this.renderer = this.createRenderer(myCanvas);
     
     // Se añade a la gui los controles para manipular los elementos de esta clase
     this.gui = this.createGUI ();
-    
     this.initStats();
-    
-    // Construimos los distinos elementos que tendremos en la escena
-    
-    // Todo elemento que se desee sea tenido en cuenta en el renderizado de la escena debe pertenecer a esta. Bien como hijo de la escena (this en esta clase) o como hijo de un elemento que ya esté en la escena.
-    // Tras crear cada elemento se añadirá a la escena con   this.add(variable)
-    this.createLights ();
-    
-    // Tendremos una cámara con un control de movimiento con el ratón
-    this.createCamera ();
-    
-    // Un suelo 
-    //this.createGround ();
-    
-    // Y unos ejes. Imprescindibles para orientarnos sobre dónde están las cosas
-    // Todas las unidades están en metros
-    this.axis = new THREE.AxesHelper (2);
-    this.add (this.axis);
+    this.createLights();
+    this.createCamera();
+    this.createBackground();
 
     
 
@@ -68,13 +33,26 @@ class MyScene extends THREE.Scene {
 
     this.decoracionTablero = new DecoracionTablero();
     this.decoracionTablero.rotateX(Math.PI/2);
-    this.decoracionTablero.position.set(0, 0.5, 0);
+    this.decoracionTablero.position.set(3.5, 0.5, 3.5);
     this.add(this.decoracionTablero);
 
 
+    // VARIABLES PARA ANIMACION DE CAMARA
+    this.isCameraRotating = false;
+    this.rotationAngle = 0;
+    this.rotationSpeed = Math.PI / 90; // velocidad del giro
+    this.rotationCenter = new THREE.Vector3(3.5, 0, 3.5); // centro del tablero
+    this.cameraRadius = this.camera.position.distanceTo(this.rotationCenter);
+    this.startRotationVector = new THREE.Vector3(); // se usará para guardar la posición inicial
+    
 
-
-
+    this.tablero.onCambioTurno = () => {
+      this.isCameraRotating = true;
+      this.rotationAngle = 0;
+      this.cameraRadius = this.camera.position.distanceTo(this.rotationCenter);
+      this.startRotationVector.subVectors(this.camera.position, this.rotationCenter);
+    };
+    
   }
   
   initStats() {
@@ -94,15 +72,11 @@ class MyScene extends THREE.Scene {
   }
   
   createCamera () {
-    // Para crear una cámara le indicamos
-    //   El ángulo del campo de visión vértical en grados sexagesimales
-    //   La razón de aspecto ancho/alto
-    //   Los planos de recorte cercano y lejano
-    this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 50);
-    // También se indica dónde se coloca
-    this.camera.position.set (12.2, 8.05, 12.2);
-    // Y hacia dónde mira
-    var look = new THREE.Vector3 (0,0,0);
+  
+    this.camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 50);
+    this.camera.position.set (3, 16, 18);
+    var look = new THREE.Vector3 (3 , -2, 1);     // Y hacia dónde mira
+
     this.camera.lookAt(look);
     this.add (this.camera);
     
@@ -110,32 +84,18 @@ class MyScene extends THREE.Scene {
     this.cameraControl = new TrackballControls (this.camera, this.renderer.domElement);
     
     // Se configuran las velocidades de los movimientos
-    this.cameraControl.rotateSpeed = 5;
-    this.cameraControl.zoomSpeed = -2;
-    this.cameraControl.panSpeed = 0.5;
-    // Debe orbitar con respecto al punto de mira de la cámara
-    this.cameraControl.target = look;
+    this.cameraControl.rotateSpeed = 2;
+    this.cameraControl.zoomSpeed = -1;
+    this.cameraControl.panSpeed = 0.2;
+
+    this.cameraControl.target = look; // Debe orbitar con respecto al punto de mira de la cámara
   }
   
-  createGround () {
-    // El suelo es un Mesh, necesita una geometría y un material.
-    
-    // La geometría es una caja con muy poca altura
-    var geometryGround = new THREE.BoxGeometry (10,0.2,10);
-    
-    // El material se hará con una textura de madera
-    var texture = new THREE.TextureLoader().load('../imgs/wood.jpg');
-    var materialGround = new THREE.MeshStandardMaterial ({map: texture});
-    
-    // Ya se puede construir el Mesh
-    var ground = new THREE.Mesh (geometryGround, materialGround);
-    
-    // Todas las figuras se crean centradas en el origen.
-    // El suelo lo bajamos la mitad de su altura para que el origen del mundo se quede en su lado superior
-    ground.position.y = -0.1;
-    
-    // Que no se nos olvide añadirlo a la escena, que en este caso es  this
-    this.add (ground);
+  createBackground() {
+    const textureLoader = new THREE.TextureLoader();
+    textureLoader.load('../imgs/fondo3.jpg', (texture) => {
+      this.background = texture;
+    });
   }
   
   createGUI () {
@@ -246,44 +206,79 @@ class MyScene extends THREE.Scene {
   }
 
   update () {
-    
     if (this.stats) this.stats.update();
-    
-    // Se actualizan los elementos de la escena para cada frame
-    
-    // Se actualiza la posición de la cámara según su controlador
-    this.cameraControl.update();
-    
-    // Se actualiza el resto del modelo
-    //this.model.update();
-    
-    // Le decimos al renderizador "visualiza la escena que te indico usando la cámara que te estoy pasando"
-    this.renderer.render (this, this.getCamera());
-
-    // Este método debe ser llamado cada vez que queramos visualizar la escena de nuevo.
-    // Literalmente le decimos al navegador: "La próxima vez que haya que refrescar la pantalla, llama al método que te indico".
-    // Si no existiera esta línea,  update()  se ejecutaría solo la primera vez.
-    requestAnimationFrame(() => this.update())
+  
+    // Desactivar controles mientras la cámara se mueve
+    this.cameraControl.enabled = !(this.isCameraMoving || this.isCameraRotating);
+  
+    // Movimiento de cámara para el turno de blancas
+    if (this.isCameraMoving) {
+      this.cameraLerpAlpha += 0.01;
+      if (this.cameraLerpAlpha >= 1) {
+        this.cameraLerpAlpha = 1;
+        this.isCameraMoving = false;
+      }
+  
+      this.camera.position.lerpVectors(this.cameraStartPos, this.cameraEndPos, this.cameraLerpAlpha);
+      this.camera.lookAt(new THREE.Vector3(3.5, 0, 3.5));
+      this.cameraControl.target.set(3.5, 0, 3.5);
+      this.cameraControl.update();
+  
+    }
+  
+    // Rotación de cámara para el turno de negras
+    else if (this.isCameraRotating) {
+      const totalRotation = Math.PI;
+      const deltaAngle = this.rotationSpeed;
+      this.rotationAngle += deltaAngle;
+  
+      if (this.rotationAngle >= totalRotation) {
+        this.rotationAngle = totalRotation;
+        this.isCameraRotating = false;
+        console.log("Animación de rotación (negras) finalizada.");
+      }
+  
+      const angle = this.rotationAngle;
+      const x = this.startRotationVector.x * Math.cos(angle) - this.startRotationVector.z * Math.sin(angle);
+      const z = this.startRotationVector.x * Math.sin(angle) + this.startRotationVector.z * Math.cos(angle);
+  
+      const newPos = new THREE.Vector3(x, this.startRotationVector.y, z).add(this.rotationCenter);
+      this.camera.position.copy(newPos);
+      this.camera.lookAt(this.rotationCenter);
+      this.cameraControl.target.copy(this.rotationCenter);
+      this.cameraControl.update();
+  
+      console.log(`Rotación: ${(this.rotationAngle * 180 / Math.PI).toFixed(2)}°`);
+    }
+  
+    // Sin animación, solo control manual
+    else {
+      this.cameraControl.update();
+    }
+  
+    // Logs de posición y punto de mira
+    const pos = this.camera.position;
+    const look = this.cameraControl.target;
+    console.log(`Posición cámara: x=${pos.x.toFixed(2)}, y=${pos.y.toFixed(2)}, z=${pos.z.toFixed(2)}`);
+    console.log(`Look at (target): x=${look.x.toFixed(2)}, y=${look.y.toFixed(2)}, z=${look.z.toFixed(2)}`);
+  
+    this.renderer.render(this, this.getCamera());
+    requestAnimationFrame(() => this.update());
   }
+  
+  
+  
 }
 
 /// La función   main
 $(function () {
-  
-  // Se instancia la escena pasándole el  div  que se ha creado en el html para visualizar
   var scene = new MyScene("#WebGL-output");
-
-  // Se añaden los listener de la aplicación. En este caso, el que va a comprobar cuándo se modifica el tamaño de la ventana de la aplicación.
   window.addEventListener ("resize", () => scene.onWindowResize());
 
   window.addEventListener('click', (event) => {
-    scene.tablero.onPulsacion(event);
-    scene.tablero.pickCasilla(event);
-    
-    
+    scene.tablero.onPulsacion(event);    
   });
+
   
-  // Que no se nos olvide, la primera visualización.
   scene.update();
 });
-

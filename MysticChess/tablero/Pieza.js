@@ -12,7 +12,6 @@ class Pieza extends THREE.Object3D {
         this.nombre = nombre;
         this.resolucion = resolucion;
         var material = null;
-        var evaluador = new CSG.Evaluator();
 
         if(equipo == 0) {
             const materialNegroSuave = new THREE.MeshStandardMaterial({ color: 0x555555 });
@@ -35,30 +34,22 @@ class Pieza extends THREE.Object3D {
         this.add(this.mesh);
     }
 
-    movimientosPosibles() { // MOSTRAR CAMINO
-        let i,j;
-        console.log(this.equipo);
-        if (this.equipo == 1) {
-            i = this.casillaActual.index[0];
-            j = this.casillaActual.index[1]-1;
-        } else if (this.equipo == 0) {
-            i = this.casillaActual.index[0];
-            j = this.casillaActual.index[1]+1;
-        }
-        
-        return [[i, j]];
+    movimientosPosibles(casillas) {
+        throw new Error('El método movimientosPosibles() debe ser implementado por la subclase.');
     }
-
     
+    moverPieza(casilla) {
+        //this.mesh.position.set(casilla.posI,0,casilla.posJ); // X Y Z
+        this.casillaActual.vaciarCasilla();
+        
+        this.casillaActual = casilla;
+        this.casillaActual.setPieza(this);
+    }
 
     generarGeometria() {
         throw new Error('El método generarGeometria() debe ser implementado por la subclase.');
     }
     
-    moverPieza(posI, posJ) {
-        this.mesh.position.set(posI,0,posJ); // X Y Z
-    }
-
     generarBrazos(material, equipo) {
         throw new Error('El método generarBrazos() debe ser implementado por la subclase.');
     }

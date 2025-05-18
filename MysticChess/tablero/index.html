@@ -1,9 +1,8 @@
 <!DOCTYPE html>
-
 <html>
 
 <head>
-    <title>Ejemplo Básico: Hola Mundo Three.js</title>
+    <title>MysticChess</title>
     <meta charset="utf-8">
     <script type="text/javascript" src="../libs/jquery.js"></script>
     
@@ -18,20 +17,44 @@
     <script type="module" src="./MyScene.js"></script>    
     
     <style>
-        body{
+        html, body {
             margin: 0;
-            overflow: hidden; 
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        #WebGL-output {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        #titulo-img {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            width: 300px; /* Ajusta el tamaño según tu imagen */
+            pointer-events: none; /* Para que no interfiera con clics */
+        }
+
+        #Stats-output {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 5;
         }
     </style>
 </head>
+
 <body>
-
-<!-- Div which will show statistical information -->
-<div id="Stats-output">
-</div>
-
-<!-- Div which will hold the Output -->
-<div id="WebGL-output">
-</div>
+    <img id="titulo-img" src="../imgs/titulo.png" />
+    <div id="Stats-output"></div>
+    <div id="WebGL-output"></div>
 </body>
 </html>

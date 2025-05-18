@@ -9,10 +9,62 @@ import { Brazos } from './Brazos.js';
 class Torre extends Pieza {
 
     constructor (equipo, casilla, nombre, resolucion) {
-        super(equipo, casilla, nombre, resolucion);
-        this.casillaActual = casilla;
-        this.equipo = equipo;
-        this.resolucion = resolucion;
+        super(equipo, casilla, nombre, resolucion);  
+    }
+
+    movimientosPosibles(casillasDisp) {
+        let i,j;
+        let casillas = [];
+
+        j= this.casillaActual.index[1];
+        let ocupada = false;
+        for(let x = this.casillaActual.index[0]-1; x >= 0; x--) {
+            if(casillasDisp[x][j].pieza !== null && casillasDisp[x][j].pieza.equipo === this.equipo) {
+                ocupada = true;
+            }
+            if(casillasDisp[x][j].pieza !== null && casillasDisp[x][j].pieza.equipo !== this.equipo && !ocupada) {
+                ocupada = true;
+                casillas.push(casillasDisp[x][j])
+            }
+            ocupada ? "" : casillas.push(casillasDisp[x][j]);
+        }
+        ocupada = false;
+        for(let x = this.casillaActual.index[0]+1; x < 8; x++) {
+            if(casillasDisp[x][j].pieza !== null && casillasDisp[x][j].pieza.equipo === this.equipo) {
+                ocupada = true;
+            }
+            if(casillasDisp[x][j].pieza !== null && casillasDisp[x][j].pieza.equipo !== this.equipo && !ocupada) {
+                ocupada = true;
+                casillas.push(casillasDisp[x][j])
+            }
+            ocupada ? "" : casillas.push(casillasDisp[x][j]);
+        }
+
+        i = this.casillaActual.index[0];
+        ocupada = false;
+        for(let y = this.casillaActual.index[1]-1; y >= 0; y--) {
+            if(casillasDisp[i][y].pieza !== null && casillasDisp[i][y].pieza.equipo === this.equipo) {
+                ocupada = true;
+            }
+            if(casillasDisp[i][y].pieza !== null && casillasDisp[i][y].pieza.equipo !== this.equipo && !ocupada) {
+                ocupada = true;
+                casillas.push(casillasDisp[i][y])
+            }
+            ocupada ? "" : casillas.push(casillasDisp[i][y]);
+        }
+        ocupada = false;
+        for(let y = this.casillaActual.index[1]+1; y < 8; y++) {
+            if(casillasDisp[i][y].pieza !== null && casillasDisp[i][y].pieza.equipo === this.equipo) {
+                ocupada = true;
+            }
+            if(casillasDisp[i][y].pieza !== null && casillasDisp[i][y].pieza.equipo !== this.equipo && !ocupada) {
+                ocupada = true;
+                casillas.push(casillasDisp[i][y])
+            }
+            ocupada ? "" : casillas.push(casillasDisp[i][y]);
+        }
+        
+        return casillas;
     }
 
     generarGeometria() {
@@ -61,33 +113,6 @@ class Torre extends Pieza {
         var geometriaTorre = figura.geometry;
         
         return geometriaTorre;
-    }
-
-    movimientosPosibles() {
-        let i,j;
-        let casillas = [];
-
-        j= this.casillaActual.index[1];
-        for(let x = this.casillaActual.index[0]-1; x >= 0; x--) {
-            casillas.push([x, j]);
-        }
-        for(let x = this.casillaActual.index[0]+1; x < 8; x++) {
-            casillas.push([x, j]);
-        }
-
-        i = this.casillaActual.index[0];
-        for(let y = this.casillaActual.index[1]-1; y >= 0; y--) {
-            casillas.push([i, y]);
-        }
-        for(let y = this.casillaActual.index[1]+1; y < 8; y++) {
-            casillas.push([i, y]);
-        }
-        
-        
-
-        
-        
-        return casillas;
     }
 
     generarBrazos(material, equipo) {

@@ -1,7 +1,5 @@
 
 import * as THREE from '../libs/three.module.js';
-import * as CSG from '../libs/three-bvh-csg.js';
-import { Pieza } from './Pieza.js';
 import { Casilla } from './Casilla.js';
 
 import { Caballo } from './Caballo.js';
@@ -15,27 +13,28 @@ import { PeonMago } from './PeonMago.js';
 class Tablero extends THREE.Object3D {
     constructor() {
         super();
-        
+        this.turnoEquipo = 1;
+        this.piezaPulsada = false;
+        this.onCambioTurno = null;
+
         var material = new THREE.MeshNormalMaterial();
         this.casillas = [];
+        this.caminoPulsable = [];
 
         this.raycaster = new THREE.Raycaster();
         this.mouse = new THREE.Vector2();
 
-        this.materialCasillaDestacada = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
-        this.casillasDestacadas = [];
-
         var marronClaro = 0xD2B48C;
         var marronOscuro = 0x5C3317;
 
-        for( let i = 0; i < 8; i++ ) {
+        for ( let i = 0; i < 8; i++ ) {
             this.casillas[i] = [];
-            for( let j = 0; j < 8; j++ ) {
+            for ( let j = 0; j < 8; j++ ) {
                 var casilla = null;
                 if( (i+j)%2 == 0 ) {
-                    casilla = new Casilla(i-3.5,j-3.5, marronClaro);
+                    casilla = new Casilla(i,j, marronClaro);
                 } else {
-                    casilla = new Casilla(i-3.5,j-3.5, marronOscuro);
+                    casilla = new Casilla(i,j, marronOscuro);
                 }
                 this.casillas[i][j] = casilla;
                 this.add(casilla);
@@ -74,6 +73,14 @@ class Tablero extends THREE.Object3D {
         }
 
     }
+
+    pasarTurno() {
+        this.turnoEquipo = this.turnoEquipo ? 0 : 1;
+        this.generarPulsables();
+        if (this.onCambioTurno) {
+            this.onCambioTurno(this.turnoEquipo); 
+        } 
+    }
     
     setCamera(camera) {
         this.camera = camera;
@@ -84,7 +91,7 @@ class Tablero extends THREE.Object3D {
         for (let i = 0; i < 8; i++) {
             for (let j = 0; j < 8; j++) {
                 const pieza = this.casillas[i][j].pieza;
-                if (pieza) {
+                if (pieza && pieza.equipo === this.turnoEquipo) {
                     this.piezasPulsables.push(pieza.mesh);
                 }
             }
@@ -94,74 +101,143 @@ class Tablero extends THREE.Object3D {
     onPulsacion(event) {
         this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         this.mouse.y = 1 - 2 * (event.clientY / window.innerHeight);
-
         this.raycaster.setFromCamera(this.mouse, this.camera);
-        this.objetosPulsados = this.raycaster.intersectObjects(this.piezasPulsables, true);
 
-        if(this.piezaSeleccionada) {
-            this.piezaSeleccionada.position.y = 0.5; // baja pieza seleccionada
-            this.reiniciarCasillasDestacadas();
-        }
+        // Intentamos primero pulsar una pieza del equipo actual
+        const piezasPulsadas = this.raycaster.intersectObjects(this.piezasPulsables, true);
+        if (piezasPulsadas.length > 0) {
+            const intersect = piezasPulsadas[0];
+            const piezaActual = intersect.object.userData.pieza;
 
-        if (this.objetosPulsados.length > 0) {
-            const intersect = this.objetosPulsados[0];
-            const pieza = intersect.object.userData.pieza;
-            if (pieza) {
-                this.piezaSeleccionada = pieza;
-                this.piezaSeleccionada.position.y = 1; // eleva pieza seleccionada
+            if (this.piezaPulsada && piezaActual === this.piezaSeleccionada) {
+                // Deselección de la misma pieza
+                this.reiniciarCamino();
+                this.piezaSeleccionada.position.y = 0.5;
+                this.piezaSeleccionada = null;
+                this.piezaPulsada = false;
+            } else {
+                // Selección de nueva pieza
+                this.reiniciarCamino();
+                if (this.piezaSeleccionada) this.piezaSeleccionada.position.y = 0.5;
 
-                console.log(`Pieza seleccionada: ${pieza.nombre}`);
+                this.piezaSeleccionada = piezaActual;
+                this.piezaSeleccionada.position.y = 1;
+                this.piezaPulsada = true;
 
-                this.casillasPulsables = pieza.movimientosPosibles();
-                console.log("Posibles casillas: ", this.casillasPulsables);
-                this.casillasPulsables.forEach(([i, j]) => {
-                    const casilla = this.casillas[i][j];
-                    if (casilla) {
-                        casilla.originalMaterial = casilla.children[0].material;
-                        casilla.children[0].material = this.materialCasillaDestacada;
-                        this.casillasDestacadas.push(casilla);
-                    }
-                });
+                this.caminoPulsable = this.piezaSeleccionada.movimientosPosibles(this.casillas);
+                this.destacarCamino();
             }
-        }
-    }
 
-    pickCasilla(event) {
-        if (this.piezaSeleccionada) { // SI HAY UNA PIEZA SELECCIONADA
-            this.mouse.x = (event.clientX / window.innerWidth) * 2-1;
-            this.mouse.y = 1-2 * (event.clientY / window.innerHeight);
-    
-            this.raycaster.setFromCamera(this.mouse, this.camera);
-            const casillasMeshes = this.casillasDestacadas.map(c => c.children[0]);
-            this.casillasPulsadas = this.raycaster.intersectObjects(casillasMeshes, true);
-    
-            if (this.casillasPulsadas.length > 0) {
-                const meshCasilla = this.casillasPulsadas[0].object;
-                const casillaDestino = this.casillas.flat().find(c => c.children[0] === meshCasilla);
-                console.log("Casilla destino: ", casillaDestino);
-                if (casillaDestino) {
-                    this.piezaSeleccionada.casillaActual.vaciarCasilla();
-                    this.piezaSeleccionada.casillaActual = casillaDestino;
-                    casillaDestino.setPieza(this.piezaSeleccionada);
+            return; // Ya se ha gestionado el clic
+        }
+
+        // Si no pulsamos una pieza, puede ser una casilla válida del camino
+        if (this.piezaPulsada && this.caminoPulsable.length > 0) {
+            const casillasPulsadas = this.raycaster.intersectObjects(this.caminoPulsable, true);
+            if (casillasPulsadas.length > 0) {
+                const casilla = casillasPulsadas[0].object.userData.casilla;
+                if (casilla && casilla !== this.piezaSeleccionada.casilla) {
+                    this.piezaSeleccionada.moverPieza(casilla);
+                    this.piezaSeleccionada.position.y = 0.5;
+                    this.reiniciarCamino();
                     this.piezaSeleccionada = null;
-                    
-                    this.reiniciarCasillasDestacadas();
+                    this.piezaPulsada = false;
+                    this.pasarTurno();
+                    this.generarPulsables();
                 }
             }
         }
     }
 
 
-    reiniciarCasillasDestacadas() {
-        this.casillasDestacadas.forEach(casilla => {
-            if (casilla.originalMaterial) {
-                casilla.children[0].material = casilla.originalMaterial;
+    /*onPulsacion(event) {
+        this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        this.mouse.y = 1 - 2 * (event.clientY / window.innerHeight);
+    
+        this.raycaster.setFromCamera(this.mouse, this.camera);
+        this.objetosPulsados = this.raycaster.intersectObjects(this.piezasPulsables, true);
+    
+        if (this.objetosPulsados.length > 0) {
+            const intersect = this.objetosPulsados[0];
+            const piezaActual = intersect.object.userData.pieza;
+    
+            if (this.piezaPulsada && piezaActual === this.piezaSeleccionada) {
+                // Deseleccionar la pieza si se vuelve a pulsar la misma
+                this.reiniciarCamino();
+                this.piezaSeleccionada.position.y = 0.5; // devuelve a altura normal
+                this.piezaPulsada = false;
+                this.piezaSeleccionada = null;
+                return;
             }
-        });
-        this.casillasDestacadas = [];
+    
+            // Si se selecciona una pieza distinta
+            this.reiniciarCamino(); // Limpia caminos anteriores si los hay
+            if(this.piezaSeleccionada) {
+                this.piezaSeleccionada.position.y= 0.5;
+            }
+                
+    
+            if (piezaActual) {
+                this.piezaSeleccionada = piezaActual;
+                this.piezaPulsada = true;
+                this.piezaSeleccionada.position.y = 1;
+    
+                this.caminoPulsable = this.piezaSeleccionada.movimientosPosibles(this.casillas);
+                //this.caminoPulsable = this.camnino.filter((casilla) => casilla.pieza === null);
+                this.destacarCamino();
+    
+                // Solo añadir listener una vez
+                if (!this.casillaListenerAdded) {
+                    this.casillaListenerAdded = true;
+                    window.addEventListener('click', (evento) => {
+                        this.onPulsacionCasilla(evento);
+                    });
+                }
+            }
+        }
+    }
+    
+
+    onPulsacionCasilla(event) {
+        if (this.piezaPulsada) { // Si hay una pieza seleccionada
+            this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            this.mouse.y = 1 - 2 * (event.clientY / window.innerHeight);
+
+            this.raycaster.setFromCamera(this.mouse, this.camera);
+            this.casillasPulsadas = this.raycaster.intersectObjects(this.caminoPulsable, true);
+            
+            if (this.casillasPulsadas.length > 0) {
+                this.intersectCasilla = this.casillasPulsadas[0];
+                const casilla = this.intersectCasilla.object.userData.casilla;
+                if (casilla && casilla !== this.piezaSeleccionada.casilla) {
+                    this.piezaSeleccionada.moverPieza(casilla);
+                    this.pasarTurno();
+                    
+                }
+                
+                this.reiniciarCamino();
+            }    
+        }
+    }*/
+
+    destacarCamino() {
+        for (let i = 0; i < this.caminoPulsable.length; i++) {
+            const casilla = this.caminoPulsable[i];
+            casilla.hacerPulsable();
+        }   
     }
 
-
+    reiniciarCamino() {
+        if (!this.caminoPulsable || this.caminoPulsable.length === 0) return;
+    
+        for (let i = 0; i < this.caminoPulsable.length; i++) {
+            const casilla = this.caminoPulsable[i];
+            casilla.retomarColor();
+        }
+    
+        this.caminoPulsable = [];
+    }
+    
 
     createGUI (gui, titleGui) {
         this.guiControls = {

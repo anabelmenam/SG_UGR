@@ -6,11 +6,111 @@ import { Brazos } from './Brazos.js'
 
 class Reina extends Pieza {
     constructor (equipo, casilla, nombre, resolucion) {
-        super(equipo, casilla, nombre, resolucion);
-        this.casillaActual = casilla;
-        this.equipo = equipo;
-        this.resolucion = resolucion;
+        super(equipo, casilla, nombre,resolucion);
     }
+
+    movimientosPosibles(casillasDisp) {
+        let i,j;
+        let casillas = [];
+
+        j= this.casillaActual.index[1];
+        let ocupada = false;
+        for(let x = this.casillaActual.index[0]-1; x >= 0; x--) {
+            if(casillasDisp[x][j].pieza !== null && casillasDisp[x][j].pieza.equipo === this.equipo) {
+                ocupada = true;
+            }
+            if(casillasDisp[x][j].pieza !== null && casillasDisp[x][j].pieza.equipo !== this.equipo && !ocupada) {
+                ocupada = true;
+                casillas.push(casillasDisp[x][j])
+            }
+            ocupada ? "" : casillas.push(casillasDisp[x][j]);
+        }
+        ocupada = false;
+        for(let x = this.casillaActual.index[0]+1; x < 8; x++) {
+            if(casillasDisp[x][j].pieza !== null && casillasDisp[x][j].pieza.equipo === this.equipo) {
+                ocupada = true;
+            }
+            if(casillasDisp[x][j].pieza !== null && casillasDisp[x][j].pieza.equipo !== this.equipo && !ocupada) {
+                ocupada = true;
+                casillas.push(casillasDisp[x][j])
+            }
+            ocupada ? "" : casillas.push(casillasDisp[x][j]);
+        }
+
+        i = this.casillaActual.index[0];
+        ocupada = false;
+        for(let y = this.casillaActual.index[1]-1; y >= 0; y--) {
+            if(casillasDisp[i][y].pieza !== null && casillasDisp[i][y].pieza.equipo === this.equipo) {
+                ocupada = true;
+            }
+            if(casillasDisp[i][y].pieza !== null && casillasDisp[i][y].pieza.equipo !== this.equipo && !ocupada) {
+                ocupada = true;
+                casillas.push(casillasDisp[i][y])
+            }
+            ocupada ? "" : casillas.push(casillasDisp[i][y]);
+        }
+        ocupada = false;
+        for(let y = this.casillaActual.index[1]+1; y < 8; y++) {
+            if(casillasDisp[i][y].pieza !== null && casillasDisp[i][y].pieza.equipo === this.equipo) {
+                ocupada = true;
+            }
+            if(casillasDisp[i][y].pieza !== null && casillasDisp[i][y].pieza.equipo !== this.equipo && !ocupada) {
+                ocupada = true;
+                casillas.push(casillasDisp[i][y])
+            }
+            ocupada ? "" : casillas.push(casillasDisp[i][y]);
+        }
+        
+        ocupada = false;
+        for(let x = this.casillaActual.index[0]-1, y = this.casillaActual.index[1]-1; x >= 0 && y >= 0; x--, y--) {
+            if(casillasDisp[x][y].pieza !== null && casillasDisp[x][y].pieza.equipo === this.equipo) {
+                ocupada = true;
+            }
+            if(casillasDisp[x][y].pieza !== null && casillasDisp[x][y].pieza.equipo !== this.equipo && !ocupada) {
+                ocupada = true;
+                casillas.push(casillasDisp[x][y])
+            }
+            ocupada ? "" : casillas.push(casillasDisp[x][y]);
+        }
+        ocupada = false;
+        for(let x = this.casillaActual.index[0]+1, y = this.casillaActual.index[1]+1; x < 8 && y < 8; x++, y++) {
+            if(casillasDisp[x][y].pieza !== null && casillasDisp[x][y].pieza.equipo === this.equipo) {
+                ocupada = true;
+            }
+            if(casillasDisp[x][y].pieza !== null && casillasDisp[x][y].pieza.equipo !== this.equipo && !ocupada) {
+                ocupada = true;
+                casillas.push(casillasDisp[x][y])
+            }
+            ocupada ? "" : casillas.push(casillasDisp[x][y]);
+        }
+        ocupada = false;
+        for(let x = this.casillaActual.index[0]-1, y = this.casillaActual.index[1]+1; x >= 0 && y < 8; x--, y++) {
+            if(casillasDisp[x][y].pieza !== null && casillasDisp[x][y].pieza.equipo === this.equipo) {
+                ocupada = true;
+            }
+            if(casillasDisp[x][y].pieza !== null && casillasDisp[x][y].pieza.equipo !== this.equipo && !ocupada) {
+                ocupada = true;
+                casillas.push(casillasDisp[x][y])
+            }
+            ocupada ? "" : casillas.push(casillasDisp[x][y]);
+        }
+        ocupada = false;
+        for(let x = this.casillaActual.index[0]+1, y = this.casillaActual.index[1]-1; x < 8 && y >= 0; x++, y--) {
+            if(casillasDisp[x][y].pieza !== null && casillasDisp[x][y].pieza.equipo === this.equipo) {
+                ocupada = true;
+            }
+            if(casillasDisp[x][y].pieza !== null && casillasDisp[x][y].pieza.equipo !== this.equipo && !ocupada) {
+                ocupada = true;
+                casillas.push(casillasDisp[x][y])
+            }
+            ocupada ? "" : casillas.push(casillasDisp[x][y]);
+        }
+
+        
+        
+        return casillas;
+    }
+
 
     generarGeometria() {
         this.material = new THREE.MeshNormalMaterial();
@@ -117,44 +217,6 @@ class Reina extends Pieza {
         return geometria;
     }
 
-    movimientosPosibles() {
-        let i,j;
-        let casillas = [];
-
-        j= this.casillaActual.index[1];
-        for(let x = this.casillaActual.index[0]-1; x >= 0; x--) {
-            casillas.push([x, j]);
-        }
-        for(let x = this.casillaActual.index[0]+1; x < 8; x++) {
-            casillas.push([x, j]);
-        }
-
-        i = this.casillaActual.index[0];
-        for(let y = this.casillaActual.index[1]-1; y >= 0; y--) {
-            casillas.push([i, y]);
-        }
-        for(let y = this.casillaActual.index[1]+1; y < 8; y++) {
-            casillas.push([i, y]);
-        }
-        
-        for(let x = this.casillaActual.index[0]-1, y = this.casillaActual.index[1]-1; x >= 0 && y >= 0; x--, y--) {
-            casillas.push([x, y]);
-        }
-        for(let x = this.casillaActual.index[0]+1, y = this.casillaActual.index[1]+1; x < 8 && y < 8; x++, y++) {
-            casillas.push([x, y]);
-        }
-        for(let x = this.casillaActual.index[0]-1, y = this.casillaActual.index[1]+1; x >= 0 && y < 8; x--, y++) {
-            casillas.push([x, y]);
-        }
-        for(let x = this.casillaActual.index[0]+1, y = this.casillaActual.index[1]-1; x < 8 && y >= 0; x++, y--) {
-            casillas.push([x, y]);
-        }
-
-        
-        
-        return casillas;
-    }
-
     generarBrazos(material, equipo) {
         const brazos = new Brazos(material, this.resolucion);
 
@@ -257,7 +319,14 @@ class Reina extends Pieza {
         return this.geometry;
     }
 
+    createGui (gui, titleGui) {
+        this.guiControls = {
+            resolucion: 20,
+        }
 
+        var folder = gui.addFolder(titleGui);
+        folder.add(this.guiControls, 'resolucion', 3, 50, 1).name('Resolucion: ').listen().onChange ( () =>this.updateGeometria() );
+    }
 }
 
 export { Reina };

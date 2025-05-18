@@ -7,9 +7,30 @@ import { Brazos } from './Brazos.js';
 class Caballo extends Pieza {
     constructor (equipo, casilla, nombre, resolucion) {
         super(equipo, casilla, nombre, resolucion);
-        this.casillaActual = casilla;
-        this.equipo = equipo;
-        this.resolucion = resolucion;
+    }
+
+    movimientosPosibles(casillasDisp) {
+        const movimientos = [
+            [2, 1], [1, 2], [-1, 2], [-2, 1],
+            [-2, -1], [-1, -2], [1, -2], [2, -1]
+        ];
+
+        const [i, j] = this.casillaActual.index;
+        const casillas = [];
+
+        for (let [dx, dy] of movimientos) {
+            const x = i + dx;
+            const y = j + dy;
+
+            if (x >= 0 && x < 8 && y >= 0 && y < 8) {
+                if(casillasDisp[x][y].pieza === null || casillasDisp[x][y].pieza.equipo !== this.equipo)  {
+                   casillas.push(casillasDisp[x][y]); 
+                }
+                
+            }
+        }
+
+        return casillas;
     }
 
     generarGeometria() {
@@ -100,28 +121,6 @@ class Caballo extends Pieza {
         var geometriaCaballo = figura.geometry;
         
         return geometriaCaballo;
-    }
-
-    movimientosPosibles() {
-        const movimientos = [
-            [2, 1], [1, 2], [-1, 2], [-2, 1],
-            [-2, -1], [-1, -2], [1, -2], [2, -1]
-        ];
-
-        const [i, j] = this.casillaActual.index;
-        const casillas = [];
-
-        for (let [dx, dy] of movimientos) {
-            const x = i + dx;
-            const y = j + dy;
-
-            // Comprobamos que no se salga del tablero
-            if (x >= 0 && x < 8 && y >= 0 && y < 8) {
-                casillas.push([x, y]);
-            }
-        }
-
-        return casillas;
     }
 
     generarBrazos(material, equipo) {

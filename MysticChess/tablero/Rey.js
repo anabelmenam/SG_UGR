@@ -6,11 +6,69 @@ import { Brazos } from './Brazos.js';
 
 class Rey extends Pieza {
     constructor (equipo, casilla, nombre, resolucion) {
-        super(equipo, casilla, nombre, resolucion);
-        this.casillaActual = casilla;
-        this.equipo = equipo;
-        this.resolucion = resolucion;
+        super(equipo, casilla, nombre, resolucion);   
     }
+
+    movimientosPosibles(casillasDisp) {
+        let i,j;
+        let casillas = [];
+
+        i = this.casillaActual.index[0]-1;
+        j = this.casillaActual.index[1];
+        if(i<8 && i>=0) {
+            casillasDisp[i][j].pieza === null || casillasDisp[i][j].pieza.equipo !==this.equipo ? casillas.push(casillasDisp[i][j]) : "";
+
+        }
+
+        i = this.casillaActual.index[0]+1;
+        j = this.casillaActual.index[1];
+        if(i<8 && i>=0) {
+            casillasDisp[i][j].pieza === null || casillasDisp[i][j].pieza.equipo !==this.equipo ? casillas.push(casillasDisp[i][j]) : "";
+
+        }
+
+        i = this.casillaActual.index[0];
+        j = this.casillaActual.index[1]-1;
+        if(j<8 && j>=0) {
+            casillasDisp[i][j].pieza === null || casillasDisp[i][j].pieza.equipo !==this.equipo ? casillas.push(casillasDisp[i][j]) : "";
+
+        }
+
+        i = this.casillaActual.index[0];
+        j = this.casillaActual.index[1]+1;
+        if(j<8 && j>=0) {
+            casillasDisp[i][j].pieza === null || casillasDisp[i][j].pieza.equipo !==this.equipo ? casillas.push(casillasDisp[i][j]) : "";
+
+        }
+
+        i = this.casillaActual.index[0] - 1;
+        j = this.casillaActual.index[1] - 1;
+        if (i < 8 && i >= 0 && j < 8 && j >= 0) {
+            casillasDisp[i][j].pieza === null || casillasDisp[i][j].pieza.equipo !== this.equipo ? casillas.push(casillasDisp[i][j]) : "";
+        }
+
+        i = this.casillaActual.index[0] - 1;
+        j = this.casillaActual.index[1] + 1;
+        if (i < 8 && i >= 0 && j < 8 && j >= 0) {
+            casillasDisp[i][j].pieza === null || casillasDisp[i][j].pieza.equipo !== this.equipo ? casillas.push(casillasDisp[i][j]) : "";
+        }
+
+        i = this.casillaActual.index[0] + 1;
+        j = this.casillaActual.index[1] - 1;
+        if (i < 8 && i >= 0 && j < 8 && j >= 0) {
+            casillasDisp[i][j].pieza === null || casillasDisp[i][j].pieza.equipo !== this.equipo ? casillas.push(casillasDisp[i][j]) : "";
+        }
+
+        i = this.casillaActual.index[0] + 1;
+        j = this.casillaActual.index[1] + 1;
+        if (i < 8 && i >= 0 && j < 8 && j >= 0) {
+            casillasDisp[i][j].pieza === null || casillasDisp[i][j].pieza.equipo !== this.equipo ? casillas.push(casillasDisp[i][j]) : "";
+        }
+        
+        return casillas;
+    }
+
+
 
     generarGeometria() {
         var evaluador = new CSG.Evaluator();
@@ -69,31 +127,6 @@ class Rey extends Pieza {
 
         var geometriaRey = figura.geometry;
         return geometriaRey;
-    }
-
-    movimientosPosibles() {
-        let i,j;
-        let casillas = [];
-
-        i = this.casillaActual.index[0]-1;
-        j = this.casillaActual.index[1];
-        casillas.push([i, j]);
-
-        i = this.casillaActual.index[0]+1;
-        j = this.casillaActual.index[1];
-        casillas.push([i, j]);
-
-        if (this.equipo == 1) {
-            i = this.casillaActual.index[0];
-            j = this.casillaActual.index[1]-1;
-        } 
-        else if (this.equipo == 0) {
-            i = this.casillaActual.index[0];
-            j = this.casillaActual.index[1]+1;
-        }
-        casillas.push([i, j]);
-        
-        return casillas;
     }
 
     generarBrazos(material, equipo) {
